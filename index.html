@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Camp — Patient Data Entry</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#f5f6fa;--card:#fff;--border:#e0e0e8;--text:#1a1a2e;--muted:#6b7280;
+    --blue:#2563eb;--blue-bg:#eff6ff;--blue-border:#bfdbfe;
+    --green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;
+    --teal:#0f766e;--teal-bg:#f0fdfa;--teal-border:#99f6e4;
+    --purple:#7c3aed;--purple-bg:#faf5ff;--purple-border:#ddd6fe;
+    --amber:#d97706;--amber-bg:#fffbeb;--amber-border:#fde68a;
+    --red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;
+    --radius:10px;--radius-sm:6px;
+  }
+  body{background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;color:var(--text);min-height:100vh}
+  a{color:inherit;text-decoration:none}
+
+  /* HEADER */
+  .header{background:#1e3a5f;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.15);position:sticky;top:0;z-index:100}
+  .header-icon{font-size:24px}
+  .header-title{flex:1}
+  .header-title h1{font-size:17px;font-weight:600;margin-bottom:1px}
+  .header-title p{font-size:12px;opacity:0.7}
+  .header-btns{display:flex;gap:8px}
+  .hbtn{padding:7px 13px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;transition:all .15s}
+  .hbtn:hover{background:rgba(255,255,255,0.2)}
+  .hbtn.green{background:#16a34a;border-color:#15803d}
+  .hbtn.green:hover{background:#15803d}
+
+  /* SETUP BANNER */
+  #setup-banner{background:#fef3c7;border-bottom:1px solid #fcd34d;padding:10px 20px;font-size:13px;color:#92400e;display:flex;align-items:center;gap:8px}
+  #setup-banner a{color:#1d4ed8;font-weight:500;text-decoration:underline;cursor:pointer}
+
+  /* TABS */
+  .tab-bar{background:#fff;border-bottom:1px solid var(--border);padding:0 16px;display:flex;gap:2px;overflow-x:auto}
+  .tab{padding:12px 16px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;transition:all .15s}
+  .tab:hover{color:var(--text)}
+  .tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+  .tab .count{background:var(--blue-bg);color:var(--blue);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:4px}
+
+  /* LAYOUT */
+  .app-body{max-width:980px;margin:0 auto;padding:16px}
+  .panel{display:none}.panel.active{display:block}
+
+  /* CARDS */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+  .card-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+  .card-title span{font-size:16px}
+
+  /* STATION BADGES */
+  .station-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:14px}
+  .s1{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+  .s2{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-border)}
+  .s3{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+
+  /* FORM */
+  .grid{display:grid;gap:12px;margin-bottom:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:1fr 1fr 1fr}
+  .g4{grid-template-columns:1fr 1fr 1fr 1fr}
+  .field label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:4px}
+  .field input,.field select,.field textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text);background:#fff;outline:none;transition:border .15s}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,0.1)}
+  .field textarea{resize:vertical;min-height:70px}
+  .field input.required-empty{border-color:var(--red)}
+
+  /* RADIO / CHECKBOX */
+  .radio-row{display:flex;gap:14px;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fafafa}
+  .radio-row label{display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;color:var(--text)}
+  .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .check-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .15s}
+  .check-item:hover{border-color:var(--blue);background:var(--blue-bg)}
+  .check-item input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--blue)}
+  .check-item.checked{border-color:var(--blue);background:var(--blue-bg);color:var(--blue);font-weight:500}
+
+  /* BUTTONS */
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .btn{padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{background:var(--bg)}
+  .btn:active{transform:scale(0.98)}
+  .btn-blue{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .btn-blue:hover{background:#1d4ed8}
+  .btn-green{background:var(--green);color:#fff;border-color:var(--green)}
+  .btn-green:hover{background:#15803d}
+  .btn-red{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+  .btn-amber{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
+
+  /* SEARCH BAR */
+  .search-bar{display:flex;gap:8px;margin-bottom:12px}
+  .search-bar input{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;transition:border .15s}
+  .search-bar input:focus{border-color:var(--blue)}
+  .search-bar .btn{white-space:nowrap}
+
+  /* PATIENT CHIP */
+  .patient-chip{background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+  .patient-chip .card-no{font-size:22px;font-weight:700;opacity:0.9;min-width:70px}
+  .patient-chip .info-item{font-size:12px;opacity:0.85}
+  .patient-chip .info-item strong{display:block;font-size:14px;opacity:1;font-weight:600}
+  .vitals-done{background:#f0fdf4;border:1px solid var(--green-border);color:var(--green);padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600}
+
+  /* ALERT */
+  .alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:12px;display:flex;align-items:center;gap:8px;border:1px solid}
+  .alert-success{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+  .alert-danger{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+  .alert-info{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)}
+
+  /* TABLE */
+  .table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{background:#f8f9fb;padding:9px 12px;text-align:left;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+  td{padding:8px 12px;border-bottom:1px solid #f0f0f5;vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#fafbff}
+  .status-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+  .s-reg{background:var(--blue-bg);color:var(--blue)}
+  .s-vit{background:var(--teal-bg);color:var(--teal)}
+  .s-done{background:var(--green-bg);color:var(--green)}
+
+  /* SYNC STATUS */
+  #sync-status{position:fixed;bottom:16px;right:16px;padding:8px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;box-shadow:0 2px 10px rgba(0,0,0,0.15);transition:all .3s;opacity:0;pointer-events:none}
+  #sync-status.show{opacity:1;pointer-events:auto}
+  #sync-status.syncing{background:#fef3c7;color:#92400e}
+  #sync-status.synced{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+  #sync-status.error{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+
+  /* SETUP MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+  .modal{background:#fff;border-radius:var(--radius);padding:24px;width:100%;max-width:520px;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+  .modal h2{font-size:16px;font-weight:600;margin-bottom:6px}
+  .modal p{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+  .modal input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:13px;margin-bottom:12px;outline:none}
+  .modal input:focus{border-color:var(--blue)}
+  .url-hint{font-size:11px;color:var(--muted);margin-top:-8px;margin-bottom:12px}
+
+  /* RESPONSIVE */
+  @media(max-width:620px){.g2,.g3,.g4{grid-template-columns:1fr}.header-btns .hbtn span{display:none}}
+
+  /* PRINT */
+  @media print{
+    body{background:#fff}
+    .header,.tab-bar,.btn-row,.search-bar,.card-title,.alert,#sync-status,.modal-overlay,#setup-banner{display:none!important}
+    .card{border:none;padding:0;box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-icon">🏥</div>
+  <div class="header-title">
+    <h1>Health Camp — Patient Data Entry</h1>
+    <p id="header-sub">Loading...</p>
+  </div>
+  <div class="header-btns">
+    <button class="hbtn" onclick="showSetup()">⚙ Setup</button>
+    <button class="hbtn" onclick="exportCSV()">⬇ Export CSV</button>
+    <button class="hbtn green" onclick="syncNow()">☁ Sync Now</button>
+  </div>
+</div>
+
+<!-- SETUP BANNER -->
+<div id="setup-banner">
+  ⚠ Google Sheets sync not configured.
+  <a onclick="showSetup()">Click here to set up</a> — or continue using local storage only.
+</div>
+
+<!-- ALERT -->
+<div id="global-alert" style="display:none;margin:10px 16px 0"></div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('reg',this)">① Registration <span class="count" id="cnt-reg">0</span></div>
+  <div class="tab" onclick="showTab('nurse',this)">② Nursing Vitals</div>
+  <div class="tab" onclick="showTab('mo',this)">③ Medical Officer</div>
+  <div class="tab" onclick="showTab('all',this)">📋 All Records <span class="count" id="cnt-all">0</span></div>
+</div>
+
+<div class="app-body">
+
+<!-- ====== TAB 1: REGISTRATION ====== -->
+<div id="tab-reg" class="panel active">
+  <div class="card">
+    <div class="station-badge s1">🪪 Station 1 — Registration Desk</div>
+    <div class="card-title"><span>➕</span> Register New Patient</div>
+    <div class="grid g4">
+      <div class="field">
+        <label>Card No *</label>
+        <input type="text" id="r-card" placeholder="e.g. HC-001" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="field" style="grid-column:span 2">
+        <label>Patient Name *</label>
+        <input type="text" id="r-name" placeholder="Full name of patient">
+      </div>
+      <div class="field">
+        <label>Age (Years)</label>
+        <input type="number" id="r-age" placeholder="e.g. 45" min="0" max="120">
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="field">
+        <label>Gender</label>
+        <div class="radio-row">
+          <label><input type="radio" name="r-gender" value="Male"> Male</label>
+          <label><input type="radio" name="r-gender" value="Female"> Female</label>
+          <label><input type="radio" name="r-gender" value="Other"> Other</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Mobile No</label>
+        <input type="tel" id="r-mobile" placeholder="10-digit mobile number" maxlength="10">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="registerPatient()">✓ Register Patient</button>
+      <button class="btn" onclick="clearReg()">✕ Clear</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span>📋</span> Registered Today</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Card No</th><th>Name</th><th>Age</th><th>Gender</th><th>Mobile</th><th>Time</th><th>Status</th></tr></thead>
+        <tbody id="reg-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No patients registered yet</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TAB 2: NURSING ====== -->
+<div id="tab-nurse" class="panel">
+  <div class="card">
+    <div class="station-badge s2">🩺 Station 2 — Nursing Staff</div>
+    <div class="card-title"><span>🔍</span> Find Patient by Card No</div>
+    <div class="search-bar">
+      <input type="text" id="n-search" placeholder="Type Card No and press Enter (e.g. HC-001)" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')searchFor('nurse')">
+      <button class="btn btn-blue" onclick="searchFor('nurse')">🔍 Search</button>
+      <button class="btn" onclick="clearNurseSearch()">Clear</button>
+    </div>
+    <div id="n-info"></div>
+  </div>
+  <div class="card" id="n-form" style="display:none">
+    <div class="card-title"><span>💉</span> Enter Vitals</div>
+    <div class="grid g2">
+      <div class="field">
+        <label>Blood Pressure (BP)</label>
+        <input type="text" id="n-bp" placeholder="e.g. 120/80 mmHg">
+      </div>
+      <div class="field">
+        <label>Random Blood Sugar (RBS)</label>
+        <input type="text" id="n-rbs" placeholder="e.g. 110 mg/dL">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="saveVitals()">✓ Save Vitals</button>
+      <button class="btn" onclick="clearNurseForm()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TAB 3: MEDICAL OFFICER ====== -->
+<div id="tab-mo" class="panel">
+  <div class="card">
+    <div class="station-badge s3">👨‍⚕️ Station 3 — Medical Officer</div>
+    <div class="card-title"><span>🔍</span> Find Patient by Card No</div>
+    <div class="search-bar">
+      <input type="text" id="m-search" placeholder="Type Card No and press Enter (e.g. HC-001)" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')searchFor('mo')">
+      <button class="btn btn-blue" onclick="searchFor('mo')">🔍 Search</button>
+      <button class="btn" onclick="clearMOSearch()">Clear</button>
+    </div>
+    <div id="m-info"></div>
+  </div>
+  <div class="card" id="m-form" style="display:none">
+    <div class="card-title"><span>📝</span> Medical History</div>
+    <div class="grid g2">
+      <div class="field">
+        <label>Regular Medication (if any)</label>
+        <textarea id="m-meds" placeholder="List current medications, dosage..."></textarea>
+      </div>
+      <div class="field">
+        <label>Family Physician Name</label>
+        <input type="text" id="m-fp" placeholder="Dr. name">
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="field">
+        <label>Past Surgery / Major Illness</label>
+        <input type="text" id="m-surgery" placeholder="If none, leave blank">
+      </div>
+      <div class="field">
+        <label>Referral Specialty</label>
+        <select id="m-referral">
+          <option value="">-- None / Not Required --</option>
+          <option>Cardiology</option><option>Diabetology</option><option>Orthopedics</option>
+          <option>Gynecology / Obstetrics</option><option>Urology</option><option>Neurology</option>
+          <option>Ophthalmology</option><option>ENT</option><option>General Surgery</option>
+          <option>Dermatology</option><option>Pulmonology</option><option>Nephrology</option>
+          <option>Gastroenterology</option><option>Psychiatry / Psychology</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="card-title" style="margin-top:8px"><span>🧪</span> Tests &amp; Investigations Required</div>
+    <div class="check-grid" id="check-grid">
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-hc"> Require Health Checkup</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-bi"> Require Blood Investigation</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-dp"> Diabetic Profile</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-cp"> Cardiac Profile</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-echo"> 2D Echo / TMT</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-vit"> Vitamin Tests</label>
+    </div>
+    <div class="field" style="margin-top:12px">
+      <label>Blood Investigation Details (if required)</label>
+      <input type="text" id="m-bi-detail" placeholder="e.g. CBC, LFT, KFT, HbA1c, Lipid Profile...">
+    </div>
+    <div class="field" style="margin-top:12px">
+      <label>Medical Officer Remarks</label>
+      <textarea id="m-remarks" placeholder="Clinical observations, advice, follow-up instructions..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="saveMO()">✓ Save Consultation</button>
+      <button class="btn btn-green" onclick="printSummary()">🖨 Print Summary</button>
+      <button class="btn" onclick="clearMOForm()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== TAB 4: ALL RECORDS ====== -->
+<div id="tab-all" class="panel">
+  <div class="card">
+    <div class="card-title"><span>📊</span> All Patient Records</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <input type="text" id="filter-text" placeholder="Search name or card no..." style="flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none" oninput="filterRecords()">
+      <select id="filter-status" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none" onchange="filterRecords()">
+        <option value="">All Statuses</option>
+        <option value="registered">Registered only</option>
+        <option value="vitals_done">Vitals done</option>
+        <option value="consultation_done">Consultation done</option>
+      </select>
+      <button class="btn btn-green" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Card No</th><th>Name</th><th>Age</th><th>Gender</th><th>Mobile</th><th>BP</th><th>RBS</th><th>Referral</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="all-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- end app-body -->
+
+<!-- SYNC STATUS TOAST -->
+<div id="sync-status"></div>
+
+<!-- SETUP MODAL -->
+<div class="modal-overlay" id="setup-modal" style="display:none">
+  <div class="modal">
+    <h2>⚙ Google Sheets Sync Setup</h2>
+    <p>Paste your Google Apps Script Web App URL below to enable live sync to Google Sheets. All patient records will be sent automatically after each save.</p>
+    <label style="font-size:12px;font-weight:500;color:var(--muted);display:block;margin-bottom:4px">Camp Name</label>
+    <input type="text" id="setup-camp" placeholder="e.g. Adajan Society Health Camp 2025">
+    <label style="font-size:12px;font-weight:500;color:var(--muted);display:block;margin-bottom:4px">Google Apps Script URL</label>
+    <input type="url" id="setup-url" placeholder="https://script.google.com/macros/s/YOUR_ID/exec">
+    <div class="url-hint">Get this URL after deploying your Apps Script as a Web App (see setup guide)</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-blue" onclick="saveSetup()" style="flex:1">Save &amp; Test Connection</button>
+      <button class="btn" onclick="closeSetup()">Cancel</button>
+    </div>
+    <div id="setup-test-result" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+var patients = {};
+var SHEET_URL = '';
+var CAMP_NAME = 'Health Camp';
+
+function loadState() {
+  try { patients = JSON.parse(localStorage.getItem('hc_pts') || '{}'); } catch(e){ patients={}; }
+  SHEET_URL = localStorage.getItem('hc_url') || '';
+  CAMP_NAME = localStorage.getItem('hc_camp') || 'Health Camp';
+  document.getElementById('header-sub').textContent = CAMP_NAME + ' · ' + new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('setup-banner').style.display = SHEET_URL ? 'none' : 'flex';
+}
+
+function persist() { localStorage.setItem('hc_pts', JSON.stringify(patients)); }
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(id, el) {
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+  el.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if (id === 'all') refreshAll();
+  updateCounts();
+}
+
+// ─── ALERTS ───────────────────────────────────────────────────────────────────
+var alertTimer;
+function showAlert(msg, type) {
+  var b = document.getElementById('global-alert');
+  b.innerHTML = '<div class="alert alert-'+(type||'success')+'">'+msg+'</div>';
+  b.style.display = 'block';
+  clearTimeout(alertTimer);
+  alertTimer = setTimeout(function(){b.style.display='none';}, 3500);
+}
+
+// ─── REGISTRATION ─────────────────────────────────────────────────────────────
+function registerPatient() {
+  var card = document.getElementById('r-card').value.trim().toUpperCase();
+  var name = document.getElementById('r-name').value.trim();
+  if (!card || !name) { showAlert('⚠ Card No and Patient Name are required.', 'danger'); return; }
+  if (patients[card]) { showAlert('⚠ Card No <strong>'+card+'</strong> is already registered!', 'danger'); return; }
+  var gender = (document.querySelector('input[name="r-gender"]:checked') || {}).value || '';
+  patients[card] = {
+    card:card, name:name, age:document.getElementById('r-age').value||'',
+    gender:gender, mobile:document.getElementById('r-mobile').value||'',
+    bp:'', rbs:'', meds:'', fp:'', surgery:'', referral:'',
+    hc:false, bi:false, bi_detail:'', dp:false, cp:false, echo:false, vit:false,
+    remarks:'', status:'registered', time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
+  };
+  persist();
+  showAlert('✓ Patient <strong>'+name+'</strong> registered with Card No: '+card);
+  clearReg();
+  refreshRegTable();
+  updateCounts();
+  syncToSheet(patients[card]);
+}
+
+function clearReg() {
+  ['r-card','r-name','r-age','r-mobile'].forEach(function(id){document.getElementById(id).value='';});
+  document.querySelectorAll('input[name="r-gender"]').forEach(function(r){r.checked=false;});
+}
+
+function refreshRegTable() {
+  var list = Object.values(patients);
+  document.getElementById('reg-tbody').innerHTML = list.length === 0
+    ? '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No patients registered yet</td></tr>'
+    : list.map(function(p){
+        return '<tr><td><strong>'+p.card+'</strong></td><td>'+p.name+'</td><td>'+(p.age||'-')+'</td><td>'+(p.gender||'-')+'</td><td>'+(p.mobile||'-')+'</td><td>'+p.time+'</td><td>'+statusPill(p.status)+'</td></tr>';
+      }).join('');
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
+function searchFor(mode) {
+  var inputId = mode === 'nurse' ? 'n-search' : 'm-search';
+  var card = document.getElementById(inputId).value.trim().toUpperCase();
+  var p = patients[card];
+  var infoDiv = document.getElementById(mode === 'nurse' ? 'n-info' : 'm-info');
+  var formCard = document.getElementById(mode === 'nurse' ? 'n-form' : 'm-form');
+
+  if (!p) {
+    infoDiv.innerHTML = '<div class="alert alert-danger">⚠ No patient found with Card No: <strong>'+card+'</strong>. Please check at registration desk.</div>';
+    formCard.style.display = 'none'; return;
+  }
+  var vitBadge = p.bp ? '<span class="vitals-done">✓ Vitals recorded</span>' : '';
+  infoDiv.innerHTML = '<div class="patient-chip"><div class="card-no">'+p.card+'</div><div class="info-item"><strong>'+p.name+'</strong>Patient Name</div><div class="info-item"><strong>'+(p.age||'-')+'</strong>Age</div><div class="info-item"><strong>'+(p.gender||'-')+'</strong>Gender</div><div class="info-item"><strong>'+(p.mobile||'-')+'</strong>Mobile</div>'+(p.bp?'<div class="info-item"><strong>'+p.bp+'</strong>BP</div>':'')+(p.rbs?'<div class="info-item"><strong>'+p.rbs+'</strong>RBS</div>':'')+vitBadge+'</div>';
+  formCard.style.display = 'block';
+
+  if (mode === 'nurse') {
+    document.getElementById('n-bp').value = p.bp || '';
+    document.getElementById('n-rbs').value = p.rbs || '';
+  } else {
+    document.getElementById('m-meds').value = p.meds || '';
+    document.getElementById('m-fp').value = p.fp || '';
+    document.getElementById('m-surgery').value = p.surgery || '';
+    document.getElementById('m-referral').value = p.referral || '';
+    document.getElementById('m-hc').checked = p.hc; updateCheckStyle('m-hc');
+    document.getElementById('m-bi').checked = p.bi; updateCheckStyle('m-bi');
+    document.getElementById('m-dp').checked = p.dp; updateCheckStyle('m-dp');
+    document.getElementById('m-cp').checked = p.cp; updateCheckStyle('m-cp');
+    document.getElementById('m-echo').checked = p.echo; updateCheckStyle('m-echo');
+    document.getElementById('m-vit').checked = p.vit; updateCheckStyle('m-vit');
+    document.getElementById('m-bi-detail').value = p.bi_detail || '';
+    document.getElementById('m-remarks').value = p.remarks || '';
+  }
+}
+
+function clearNurseSearch(){document.getElementById('n-search').value='';document.getElementById('n-info').innerHTML='';document.getElementById('n-form').style.display='none';}
+function clearMOSearch(){document.getElementById('m-search').value='';document.getElementById('m-info').innerHTML='';document.getElementById('m-form').style.display='none';}
+function clearNurseForm(){document.getElementById('n-bp').value='';document.getElementById('n-rbs').value='';}
+function clearMOForm(){['m-meds','m-fp','m-surgery','m-bi-detail','m-remarks'].forEach(function(id){document.getElementById(id).value='';});['m-hc','m-bi','m-dp','m-cp','m-echo','m-vit'].forEach(function(id){document.getElementById(id).checked=false;updateCheckStyle(id);});document.getElementById('m-referral').value='';}
+
+// ─── VITALS ───────────────────────────────────────────────────────────────────
+function saveVitals() {
+  var card = document.getElementById('n-search').value.trim().toUpperCase();
+  if (!patients[card]) return;
+  patients[card].bp = document.getElementById('n-bp').value;
+  patients[card].rbs = document.getElementById('n-rbs').value;
+  patients[card].status = 'vitals_done';
+  persist(); refreshRegTable(); updateCounts();
+  showAlert('✓ Vitals saved for <strong>'+patients[card].name+'</strong>');
+  syncToSheet(patients[card]);
+}
+
+// ─── MEDICAL OFFICER ──────────────────────────────────────────────────────────
+function saveMO() {
+  var card = document.getElementById('m-search').value.trim().toUpperCase();
+  if (!patients[card]) return;
+  var p = patients[card];
+  p.meds = document.getElementById('m-meds').value;
+  p.fp = document.getElementById('m-fp').value;
+  p.surgery = document.getElementById('m-surgery').value;
+  p.referral = document.getElementById('m-referral').value;
+  p.hc = document.getElementById('m-hc').checked;
+  p.bi = document.getElementById('m-bi').checked;
+  p.bi_detail = document.getElementById('m-bi-detail').value;
+  p.dp = document.getElementById('m-dp').checked;
+  p.cp = document.getElementById('m-cp').checked;
+  p.echo = document.getElementById('m-echo').checked;
+  p.vit = document.getElementById('m-vit').checked;
+  p.remarks = document.getElementById('m-remarks').value;
+  p.status = 'consultation_done';
+  persist(); refreshRegTable(); updateCounts();
+  showAlert('✓ Consultation saved for <strong>'+p.name+'</strong>');
+  syncToSheet(p);
+}
+
+// ─── CHECKBOX STYLE ───────────────────────────────────────────────────────────
+function toggleCheck(label) {
+  setTimeout(function(){
+    var cb = label.querySelector('input[type=checkbox]');
+    label.classList.toggle('checked', cb.checked);
+  }, 0);
+}
+function updateCheckStyle(id) {
+  var cb = document.getElementById(id);
+  if (cb) cb.closest('label').classList.toggle('checked', cb.checked);
+}
+
+// ─── STATUS PILL ─────────────────────────────────────────────────────────────
+function statusPill(s) {
+  if (s === 'consultation_done') return '<span class="status-pill s-done">✓ Consult done</span>';
+  if (s === 'vitals_done') return '<span class="status-pill s-vit">💉 Vitals done</span>';
+  return '<span class="status-pill s-reg">🪪 Registered</span>';
+}
+
+// ─── ALL RECORDS ──────────────────────────────────────────────────────────────
+function refreshAll() {
+  var q = (document.getElementById('filter-text').value||'').toLowerCase();
+  var sf = document.getElementById('filter-status').value;
+  var list = Object.values(patients).filter(function(p){
+    var matchText = !q || p.card.toLowerCase().includes(q) || p.name.toLowerCase().includes(q);
+    var matchStatus = !sf || p.status === sf;
+    return matchText && matchStatus;
+  });
+  document.getElementById('all-tbody').innerHTML = list.length === 0
+    ? '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:20px">No records found</td></tr>'
+    : list.map(function(p){
+        return '<tr><td><strong>'+p.card+'</strong></td><td>'+p.name+'</td><td>'+(p.age||'-')+'</td><td>'+(p.gender||'-')+'</td><td>'+(p.mobile||'-')+'</td><td>'+(p.bp||'-')+'</td><td>'+(p.rbs||'-')+'</td><td>'+(p.referral||'-')+'</td><td>'+statusPill(p.status)+'</td><td><button class="btn" style="padding:4px 10px;font-size:11px" onclick="printCard(\''+p.card+'\')">🖨 Print</button></td></tr>';
+      }).join('');
+}
+
+function filterRecords() { refreshAll(); }
+
+function updateCounts() {
+  var n = Object.keys(patients).length;
+  document.getElementById('cnt-reg').textContent = n;
+  document.getElementById('cnt-all').textContent = n;
+}
+
+// ─── PRINT ────────────────────────────────────────────────────────────────────
+function printSummary() {
+  var card = document.getElementById('m-search').value.trim().toUpperCase();
+  if (!patients[card]) { showAlert('Search a patient first', 'danger'); return; }
+  printCard(card);
+}
+
+function printCard(card) {
+  var p = patients[card]; if (!p) return;
+  var tests = [p.hc?'Health Checkup':'',p.bi?'Blood Investigation':'',p.dp?'Diabetic Profile':'',p.cp?'Cardiac Profile':'',p.echo?'2D Echo / TMT':'',p.vit?'Vitamin Tests':''].filter(Boolean).join(', ') || 'None';
+  var date = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  var w = window.open('','_blank','width=750,height:950');
+  w.document.write('<!DOCTYPE html><html><head><title>Summary — '+p.card+'</title><style>');
+  w.document.write('*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:13px;color:#111;padding:28px 32px;max-width:720px;margin:0 auto}');
+  w.document.write('.hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1e3a5f;padding-bottom:12px;margin-bottom:16px}');
+  w.document.write('.hd h1{font-size:20px;color:#1e3a5f;margin-bottom:3px}.hd p{font-size:12px;color:#666}');
+  w.document.write('.card-no-box{background:#1e3a5f;color:#fff;padding:8px 16px;border-radius:8px;text-align:center}.card-no-box .cn{font-size:24px;font-weight:700}.card-no-box small{font-size:11px;opacity:.8}');
+  w.document.write('.sec{margin-bottom:16px}.sec-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#1e3a5f;border-bottom:1px solid #ddd;padding-bottom:5px;margin-bottom:10px}');
+  w.document.write('.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row{margin-bottom:6px}.lbl{font-size:11px;color:#777}.val{font-size:13px;font-weight:600;color:#111}');
+  w.document.write('.test-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.test-item{display:flex;align-items:center;gap:6px;font-size:12px;padding:5px 8px;background:#f5f7ff;border-radius:4px}');
+  w.document.write('.dot{width:8px;height:8px;border-radius:50%;background:#2563eb;flex-shrink:0}');
+  w.document.write('.remarks-box{background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:10px 14px;font-size:13px;min-height:50px;line-height:1.6}');
+  w.document.write('.footer{margin-top:24px;display:flex;justify-content:space-between;font-size:11px;color:#888;border-top:1px solid #ddd;padding-top:10px}');
+  w.document.write('.sig{text-align:center;margin-top:32px;font-size:12px;color:#444}.sig-line{border-top:1.5px solid #333;width:200px;margin:0 auto 4px}');
+  w.document.write('@media print{.no-print{display:none!important}}</style></head><body>');
+  w.document.write('<div class="hd"><div><h1>🏥 '+CAMP_NAME+'</h1><p>Patient Summary Report &nbsp;|&nbsp; Date: '+date+'</p></div><div class="card-no-box"><div class="cn">'+p.card+'</div><small>Card No</small></div></div>');
+  w.document.write('<div class="sec"><div class="sec-title">Patient Information</div><div class="grid2"><div class="row"><div class="lbl">Full Name</div><div class="val">'+p.name+'</div></div><div class="row"><div class="lbl">Age</div><div class="val">'+(p.age||'—')+' Years</div></div><div class="row"><div class="lbl">Gender</div><div class="val">'+(p.gender||'—')+'</div></div><div class="row"><div class="lbl">Mobile No</div><div class="val">'+(p.mobile||'—')+'</div></div><div class="row"><div class="lbl">Family Physician</div><div class="val">'+(p.fp||'—')+'</div></div><div class="row"><div class="lbl">Time of Registration</div><div class="val">'+p.time+'</div></div></div></div>');
+  w.document.write('<div class="sec"><div class="sec-title">Vitals (Recorded by Nurse)</div><div class="grid2"><div class="row"><div class="lbl">Blood Pressure (BP)</div><div class="val">'+(p.bp||'Not recorded')+'</div></div><div class="row"><div class="lbl">Random Blood Sugar (RBS)</div><div class="val">'+(p.rbs||'Not recorded')+'</div></div></div></div>');
+  w.document.write('<div class="sec"><div class="sec-title">Medical History</div><div class="grid2"><div class="row"><div class="lbl">Regular Medication</div><div class="val">'+(p.meds||'None')+'</div></div><div class="row"><div class="lbl">Past Surgery / Illness</div><div class="val">'+(p.surgery||'None')+'</div></div></div></div>');
+  w.document.write('<div class="sec"><div class="sec-title">Referral &amp; Tests Advised</div><div class="row" style="margin-bottom:10px"><div class="lbl">Referral Specialty</div><div class="val">'+(p.referral||'None')+'</div></div>');
+  var testItems = [p.hc?'Health Checkup':'',p.bi?'Blood Investigation':'',p.dp?'Diabetic Profile':'',p.cp?'Cardiac Profile':'',p.echo?'2D Echo / TMT':'',p.vit?'Vitamin Tests':''].filter(Boolean);
+  if(testItems.length>0){w.document.write('<div class="test-grid">'+testItems.map(function(t){return'<div class="test-item"><div class="dot"></div>'+t+'</div>';}).join('')+'</div>');}
+  if(p.bi_detail){w.document.write('<div class="row" style="margin-top:8px"><div class="lbl">Blood Investigation Details</div><div class="val">'+p.bi_detail+'</div></div>');}
+  w.document.write('</div>');
+  w.document.write('<div class="sec"><div class="sec-title">Medical Officer Remarks</div><div class="remarks-box">'+(p.remarks||'—')+'</div></div>');
+  w.document.write('<div class="sig"><div class="sig-line"></div>Medical Officer Signature &amp; Stamp</div>');
+  w.document.write('<div class="footer"><span>Card No: '+p.card+'</span><span>Camp: '+CAMP_NAME+'</span><span>Generated: '+new Date().toLocaleString('en-IN')+'</span></div>');
+  w.document.write('<br><button class="no-print" onclick="window.print()" style="padding:10px 24px;background:#1e3a5f;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer;margin-right:8px">🖨 Print / Save PDF</button>');
+  w.document.write('<button class="no-print" onclick="window.close()" style="padding:10px 18px;background:#eee;border:none;border-radius:6px;font-size:14px;cursor:pointer">Close</button>');
+  w.document.write('</body></html>'); w.document.close();
+}
+
+// ─── EXPORT CSV ───────────────────────────────────────────────────────────────
+function exportCSV() {
+  var list = Object.values(patients);
+  if (!list.length) { showAlert('No patient data to export', 'danger'); return; }
+  var H = ['Card No','Patient Name','Age','Gender','Mobile No','BP','RBS','Regular Medication','Family Physician','Past Surgery','Referral Specialty','Health Checkup','Blood Investigation','Blood Inv. Details','Diabetic Profile','Cardiac Profile','2D Echo/TMT','Vitamin Tests','MO Remarks','Status','Registration Time'];
+  var rows = [H].concat(list.map(function(p){
+    return [p.card,p.name,p.age,p.gender,p.mobile,p.bp,p.rbs,p.meds,p.fp,p.surgery,p.referral,p.hc?'Yes':'No',p.bi?'Yes':'No',p.bi_detail,p.dp?'Yes':'No',p.cp?'Yes':'No',p.echo?'Yes':'No',p.vit?'Yes':'No',p.remarks,p.status,p.time];
+  }));
+  var csv = rows.map(function(r){ return r.map(function(c){ var s=String(c||'').replace(/"/g,'""'); return (s.indexOf(',')>-1||s.indexOf('"')>-1||s.indexOf('\n')>-1)?'"'+s+'"':s; }).join(','); }).join('\n');
+  var blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url;
+  a.download = CAMP_NAME.replace(/\s+/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  showAlert('✓ Exported '+list.length+' records. Open the CSV file in Excel.');
+}
+
+// ─── GOOGLE SHEETS SYNC ───────────────────────────────────────────────────────
+function syncToSheet(p) {
+  if (!SHEET_URL) return;
+  showSyncStatus('syncing', '☁ Syncing...');
+  var data = {
+    action: 'upsert',
+    camp: CAMP_NAME,
+    date: new Date().toLocaleDateString('en-IN'),
+    patient: p
+  };
+  fetch(SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).then(function(){
+    showSyncStatus('synced', '✓ Synced to Google Sheets');
+  }).catch(function(){
+    showSyncStatus('error', '⚠ Sync failed — saved locally');
+  });
+}
+
+function syncNow() {
+  if (!SHEET_URL) { showSetup(); return; }
+  var list = Object.values(patients);
+  if (!list.length) { showAlert('No data to sync', 'danger'); return; }
+  showSyncStatus('syncing', '☁ Syncing all records...');
+  var data = { action: 'sync_all', camp: CAMP_NAME, date: new Date().toLocaleDateString('en-IN'), patients: list };
+  fetch(SHEET_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  }).then(function(){
+    showSyncStatus('synced', '✓ All '+list.length+' records synced');
+  }).catch(function(){
+    showSyncStatus('error', '⚠ Sync failed. Check URL in Setup.');
+  });
+}
+
+var syncTimer;
+function showSyncStatus(cls, msg) {
+  var el = document.getElementById('sync-status');
+  el.className = 'show ' + cls; el.textContent = msg;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(function(){ el.className = ''; }, 4000);
+}
+
+// ─── SETUP MODAL ─────────────────────────────────────────────────────────────
+function showSetup() {
+  document.getElementById('setup-url').value = SHEET_URL;
+  document.getElementById('setup-camp').value = CAMP_NAME;
+  document.getElementById('setup-modal').style.display = 'flex';
+  document.getElementById('setup-test-result').innerHTML = '';
+}
+function closeSetup() { document.getElementById('setup-modal').style.display = 'none'; }
+function saveSetup() {
+  var url = document.getElementById('setup-url').value.trim();
+  var camp = document.getElementById('setup-camp').value.trim() || 'Health Camp';
+  SHEET_URL = url; CAMP_NAME = camp;
+  localStorage.setItem('hc_url', url);
+  localStorage.setItem('hc_camp', camp);
+  document.getElementById('header-sub').textContent = CAMP_NAME + ' · ' + new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('setup-banner').style.display = url ? 'none' : 'flex';
+  if (url) {
+    document.getElementById('setup-test-result').innerHTML = '<div class="alert alert-info">Testing connection...</div>';
+    fetch(url, {method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'ping',camp:camp})})
+      .then(function(){ document.getElementById('setup-test-result').innerHTML = '<div class="alert alert-success">✓ Connection successful! Google Sheets sync is active.</div>'; setTimeout(closeSetup, 2000); })
+      .catch(function(){ document.getElementById('setup-test-result').innerHTML = '<div class="alert alert-danger">⚠ Could not connect. Please check the URL and make sure the script is deployed as "Anyone" can access.</div>'; });
+  } else { closeSetup(); }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+loadState();
+refreshRegTable();
+updateCounts();
+</script>
+</body>
+</html>
