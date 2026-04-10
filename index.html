@@ -378,7 +378,7 @@
 // ═══════════════════════════════════════════════════════════════
 //  ✏️  EDIT ONLY THESE TWO LINES — then save and upload to GitHub
 // ═══════════════════════════════════════════════════════════════
-var SHEET_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+var SHEET_URL = 'https://script.google.com/macros/s/AKfycbwOfcp060bKasNZGMBv84u5z3x2tgNK3nSVBbFwIdMxNMQhoCaB9bWVG6y7Hs91JaXW/exec';
 var CAMP_NAME = 'Health Camp 2026';
 // ═══════════════════════════════════════════════════════════════
 
@@ -388,7 +388,7 @@ function loadState() {
   try { patients = JSON.parse(localStorage.getItem('hc_pts') || '{}'); } catch(e){ patients={}; }
   // Merge any camp name stored locally (in case overridden via UI) but prefer hardcoded
   document.getElementById('header-sub').textContent = CAMP_NAME + ' · ' + new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-  var configured = SHEET_URL && SHEET_URL !== 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+  var configured = SHEET_URL && SHEET_URL !== 'https://script.google.com/macros/s/AKfycbwOfcp060bKasNZGMBv84u5z3x2tgNK3nSVBbFwIdMxNMQhoCaB9bWVG6y7Hs91JaXW/exec';
   document.getElementById('setup-banner').style.display = configured ? 'none' : 'flex';
 }
 
