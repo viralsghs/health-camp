@@ -500,7 +500,7 @@ tr:hover td{background:#fafbff}
 // ═══════════════════════════════════════════════════════════════
 //  ✏️  EDIT ONLY THESE TWO LINES — then save and upload to GitHub
 // ═══════════════════════════════════════════════════════════════
-var SHEET_URL = 'https://script.google.com/macros/s/AKfycbx2FeL45jkYG9jz7bat06tGzvgkt5g2vQynfK53v0gQxPB30TyjLVcmPAyKv0XBNDPj/exec';
+var SHEET_URL = 'https://script.google.com/macros/s/AKfycbzQA1JmSDSAy4ha0oWITt6XzAYXcFHD-x7_YCS9rAYfBt3tgvO6wLKfx1Nx1RYAzAew/exec';
 var CAMP_NAME = 'Health Camp 2026';
 // ═══════════════════════════════════════════════════════════════
 
@@ -512,7 +512,7 @@ var activeTriage    = '';
 // ── INIT ───────────────────────────────────────────────────────
 function init() {
   try { patients = JSON.parse(localStorage.getItem('hc_pts') || '{}'); } catch(e){ patients={}; }
-  var ok = SHEET_URL && SHEET_URL !== 'https://script.google.com/macros/s/AKfycbx2FeL45jkYG9jz7bat06tGzvgkt5g2vQynfK53v0gQxPB30TyjLVcmPAyKv0XBNDPj/exec';
+  var ok = SHEET_URL && SHEET_URL !== 'https://script.google.com/macros/s/AKfycbzQA1JmSDSAy4ha0oWITt6XzAYXcFHD-x7_YCS9rAYfBt3tgvO6wLKfx1Nx1RYAzAew/exec';
   document.getElementById('setup-banner').style.display = ok ? 'none' : 'flex';
   document.getElementById('header-sub').textContent = CAMP_NAME + ' · ' + new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
   refreshAll_reg();
@@ -521,7 +521,7 @@ function init() {
 
 function persist() { localStorage.setItem('hc_pts', JSON.stringify(patients)); }
 
-function isConfigured() { return SHEET_URL && SHEET_URL !== 'https://script.google.com/macros/s/AKfycbx2FeL45jkYG9jz7bat06tGzvgkt5g2vQynfK53v0gQxPB30TyjLVcmPAyKv0XBNDPj/exec'; }
+function isConfigured() { return SHEET_URL && SHEET_URL !== 'https://script.google.com/macros/s/AKfycbzQA1JmSDSAy4ha0oWITt6XzAYXcFHD-x7_YCS9rAYfBt3tgvO6wLKfx1Nx1RYAzAew/exec'; }
 
 // ── SORTED KEYS (descending Card No) ───────────────────────────
 function sortedCards(subset) {
