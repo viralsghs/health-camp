@@ -599,28 +599,37 @@ function todayKey() {
 
 // Returns today's date in multiple formats for matching
 function isToday(p) {
+  if (!p.reg_date) return true; // legacy records without date — always show
+
   var today = new Date();
   var d = today.getDate();
   var m = today.getMonth() + 1;
   var y = today.getFullYear();
-  // Build multiple format variants to match how registration time is stored
+
+  // Normalize the stored reg_date string for comparison
+  var raw = String(p.reg_date).trim();
+
+  // Try parsing it as a real date
+  var parsed = new Date(raw);
+  if (!isNaN(parsed.getTime())) {
+    return parsed.getDate() === d &&
+           parsed.getMonth() + 1 === m &&
+           parsed.getFullYear() === y;
+  }
+
+  // Fallback: check all known format variants
   var variants = [
     d+'/'+m+'/'+y,
     (d<10?'0'+d:d)+'/'+(m<10?'0'+m:m)+'/'+y,
     new Date().toLocaleDateString('en-IN'),
     new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
     new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}),
+    y+'-'+(m<10?'0'+m:m)+'-'+(d<10?'0'+d:d),  // ISO format
+    d+'-'+m+'-'+y,
   ];
-  // Check against registration date stored in patient.reg_date
-  if (p.reg_date) {
-    for (var i=0; i<variants.length; i++) {
-      if (p.reg_date === variants[i]) return true;
-    }
-  }
-  // Fallback: if no reg_date (old records), show them too
-  return !p.reg_date;
-}
 
+  return variants.some(function(v){ return raw === v; });
+}
 function sortedCards(subset) {
   var list = (subset || Object.values(patients)).filter(isToday);
   return list.sort(function(a,b){
