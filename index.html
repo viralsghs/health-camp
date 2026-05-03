@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marengo Asia Hospital — Health Camp</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f6fa;--card:#fff;--border:#e0e0e8;--text:#1a1a2e;--muted:#6b7280;
+  --blue:#2563eb;--blue-bg:#eff6ff;--blue-border:#bfdbfe;
+  --green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;
+  --teal:#0f766e;--teal-bg:#f0fdfa;--teal-border:#99f6e4;
+  --purple:#7c3aed;--purple-bg:#faf5ff;--purple-border:#ddd6fe;
+  --amber:#d97706;--amber-bg:#fffbeb;--amber-border:#fde68a;
+  --red:#dc2626;--red-bg:#fef2f2;--red-border:#fecaca;
+  --radius:10px;--radius-sm:6px;
+}
+body{background:var(--bg);font-family:"Segoe UI",system-ui,sans-serif;font-size:14px;color:var(--text);min-height:100vh}
+
+/* HEADER */
+.header{background:#1e3a5f;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.15);position:sticky;top:0;z-index:100}
+.header-logo{height:52px;display:flex;align-items:center;flex-shrink:0;background:#fff;border-radius:6px;padding:3px 8px}
+.header-title{flex:1}
+.header-title h1{font-size:16px;font-weight:600;margin-bottom:1px}
+.header-title p{font-size:11px;opacity:0.75}
+.header-btns{display:flex;gap:8px;flex-shrink:0}
+.hbtn{padding:7px 12px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1);color:#fff;transition:all .15s;white-space:nowrap}
+.hbtn:hover{background:rgba(255,255,255,0.2)}
+.hbtn.green{background:#16a34a;border-color:#15803d}
+.hbtn.green:hover{background:#15803d}
+
+/* BANNER */
+#setup-banner{background:#fef3c7;border-bottom:1px solid #fcd34d;padding:9px 20px;font-size:13px;color:#92400e;display:none;align-items:center;gap:8px}
+
+/* TABS */
+.tab-bar{background:#fff;border-bottom:1px solid var(--border);padding:0 16px;display:flex;gap:2px;overflow-x:auto}
+.tab{padding:11px 16px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;transition:all .15s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab .cnt{background:var(--blue-bg);color:var(--blue);font-size:11px;padding:1px 6px;border-radius:10px;margin-left:4px}
+
+/* LAYOUT */
+.app-body{max-width:1020px;margin:0 auto;padding:16px}
+.panel{display:none}.panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+
+/* STATION BADGES */
+.sbadge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:14px}
+.s1{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)}
+.s2{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-border)}
+.s3{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)}
+
+/* FORM */
+.grid{display:grid;gap:12px;margin-bottom:12px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:4px}
+.req{color:var(--red)}
+.field input,.field select,.field textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;color:var(--text);background:#fff;outline:none;transition:border .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--blue)}
+.field input.err,.field select.err{border-color:var(--red)!important}
+.field textarea{resize:vertical;min-height:68px}
+.field .hint{font-size:11px;color:var(--muted);margin-top:3px}
+.radio-row{display:flex;gap:14px;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:#fafafa;transition:border .15s}
+.radio-row label{display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer}
+.radio-row.err{border-color:var(--red)!important}
+
+/* BMI BADGE */
+.bmi-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:13px;font-weight:600;margin-top:6px}
+.bmi-under{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.bmi-normal{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.bmi-over{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+.bmi-obese{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+
+/* TRIAGE BUTTONS */
+.triage-row{display:flex;gap:10px;margin-bottom:2px}
+.triage-btn{flex:1;padding:12px 8px;border-radius:var(--radius-sm);border:2px solid transparent;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;text-align:center;opacity:.55}
+.triage-btn:hover{opacity:.8}
+.triage-btn.active{opacity:1;transform:scale(1.02)}
+.t-green{background:#f0fdf4;border-color:#16a34a;color:#15803d}
+.t-green.active{background:#dcfce7;border-color:#15803d;box-shadow:0 0 0 3px rgba(22,163,74,.15)}
+.t-yellow{background:#fffbeb;border-color:#d97706;color:#b45309}
+.t-yellow.active{background:#fef3c7;border-color:#b45309;box-shadow:0 0 0 3px rgba(217,119,6,.15)}
+.t-red{background:var(--red-bg);border-color:var(--red);color:#b91c1c}
+.t-red.active{background:#fee2e2;border-color:#b91c1c;box-shadow:0 0 0 3px rgba(220,38,38,.15)}
+.triage-dot{width:14px;height:14px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle}
+.dot-g{background:#16a34a}.dot-y{background:#d97706}.dot-r{background:#dc2626}
+
+/* SEARCH */
+.search-bar{display:flex;gap:8px;margin-bottom:12px}
+.search-bar input{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:14px;outline:none;transition:border .15s}
+.search-bar input:focus{border-color:var(--blue)}
+
+/* PATIENT CHIP */
+.pt-chip{background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.pt-chip .cno{font-size:22px;font-weight:700;min-width:65px}
+.pt-chip .inf{font-size:12px;opacity:.85}
+.pt-chip .inf strong{display:block;font-size:14px;opacity:1;font-weight:600}
+
+/* PATIENT LIST TABLE */
+.table-wrap{overflow-x:auto;border-radius:var(--radius-sm);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f8f9fb;padding:8px 12px;text-align:left;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:7px 12px;border-bottom:1px solid #f0f0f5;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbff}
+
+/* STATUS PILLS */
+.spill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600}
+.sp-reg{background:var(--blue-bg);color:var(--blue)}
+.sp-vit{background:var(--teal-bg);color:var(--teal)}
+.sp-done{background:var(--green-bg);color:var(--green)}
+
+/* TRIAGE PILL */
+.tri-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600}
+.tri-g{background:#dcfce7;color:#15803d}
+.tri-y{background:#fef3c7;color:#b45309}
+.tri-r{background:#fee2e2;color:#b91c1c}
+
+/* EDIT BTN */
+.edit-btn{padding:4px 10px;font-size:11px;border-radius:var(--radius-sm);border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--blue);font-weight:500;white-space:nowrap}
+.edit-btn:hover{background:var(--blue-bg)}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn{padding:9px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--text);transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--bg)}
+.btn:active{transform:scale(.98)}
+.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-blue:hover{background:#1d4ed8}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-green:hover{background:#15803d}
+
+/* ALERT */
+.alert{padding:10px 14px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:12px;border:1px solid;display:flex;align-items:flex-start;gap:8px}
+.alert-success{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+.alert-danger{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.alert-info{background:var(--blue-bg);color:var(--blue);border-color:var(--blue-border)}
+
+/* SYNC TOAST */
+#sync-toast{position:fixed;bottom:16px;right:16px;padding:8px 14px;border-radius:var(--radius);font-size:12px;font-weight:500;box-shadow:0 2px 10px rgba(0,0,0,.15);transition:all .3s;opacity:0;pointer-events:none;z-index:999}
+#sync-toast.show{opacity:1}
+#sync-toast.syncing{background:#fef3c7;color:#92400e}
+#sync-toast.synced{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+#sync-toast.error{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)}
+
+/* INFO MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:var(--radius);padding:24px;width:100%;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:12px}
+
+/* SECTION DIVIDER */
+.sdiv{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+
+/* CHECK GRID */
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:all .15s}
+.check-item:hover{border-color:var(--blue);background:var(--blue-bg)}
+.check-item input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--blue)}
+.check-item.checked{border-color:var(--blue);background:var(--blue-bg);color:var(--blue);font-weight:500}
+
+@media(max-width:640px){.g2,.g3,.g4{grid-template-columns:1fr}.header-title h1{font-size:14px}.hbtn{font-size:11px;padding:6px 9px}}
+@media print{#app-root{display:none!important}#print-frame{position:static!important;padding:0!important}#print-iframe{height:100vh!important}}
+</style>
+</head>
+<body>
+<div id="app-root">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">
+    <img src="data:image/jpeg;base64,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" alt="Marengo Asia Hospital" style="height:52px;width:auto;object-fit:contain;max-width:120px">
+  </div>
+  <div class="header-title">
+    <h1>Marengo Asia Hospital — Health Camp</h1>
+    <p id="header-sub">Loading...</p>
+  </div>
+  <div class="header-btns">
+    <button class="hbtn" onclick="showInfo()">ℹ Info</button>
+    <button class="hbtn" onclick="exportCSV()">⬇ CSV</button>
+    <button class="hbtn green" onclick="syncNow()">☁ Sync</button>
+  </div>
+</div>
+
+<!-- BANNER -->
+<div id="setup-banner">⚠ Google Sheets sync not configured — edit SHEET_URL in index.html and re-upload to GitHub.</div>
+
+<!-- ALERT -->
+<div id="g-alert" style="display:none;padding:0 16px;margin-top:10px"></div>
+
+<!-- TABS -->
+<div class="tab-bar">
+  <div class="tab active" onclick="showTab('reg',this)">① Registration <span class="cnt" id="cnt-reg">0</span></div>
+  <div class="tab" onclick="showTab('nurse',this)">② Nursing Vitals <span class="cnt" id="cnt-nurse">0</span></div>
+  <div class="tab" onclick="showTab('mo',this)">③ Medical Officer <span class="cnt" id="cnt-mo">0</span></div>
+  <div class="tab" onclick="showTab('all',this)">📋 All Records <span class="cnt" id="cnt-all">0</span></div>
+</div>
+
+<div class="app-body">
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 1 — REGISTRATION
+══════════════════════════════════════════════════════════ -->
+<div id="tab-reg" class="panel active">
+  <div class="card">
+    <div class="sbadge s1">🪪 Station 1 — Registration Desk</div>
+    <div class="card-title">➕ Register New Patient</div>
+    <div class="grid g4">
+      <div class="field">
+        <label>Card No <span class="req">*</span></label>
+        <input type="text" id="r-card" placeholder="e.g. HC-001" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="field" style="grid-column:span 2">
+        <label>Patient Name <span class="req">*</span></label>
+        <input type="text" id="r-name" placeholder="Full name">
+      </div>
+      <div class="field">
+        <label>Age (Years) <span class="req">*</span></label>
+        <input type="number" id="r-age" placeholder="e.g. 45" min="1" max="120">
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="field">
+        <label>Gender <span class="req">*</span></label>
+        <div class="radio-row" id="rr-gender">
+          <label><input type="radio" name="r-gender" value="Male"> Male</label>
+          <label><input type="radio" name="r-gender" value="Female"> Female</label>
+          <label><input type="radio" name="r-gender" value="Other"> Other</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Mobile No <span class="req">*</span></label>
+        <input type="tel" id="r-mobile" placeholder="10-digit mobile number" maxlength="10">
+        <div class="hint">Must start with 6-9, exactly 10 digits</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="registerPatient()">✓ Register Patient</button>
+      <button class="btn" onclick="clearReg()">✕ Clear</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Registered Today (<span id="today-label"></span>) — sorted by Card No (newest first)</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Card No</th><th>Name</th><th>Age</th><th>Gender</th><th>Mobile</th><th>Time</th><th>Status</th></tr></thead>
+        <tbody id="reg-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 2 — NURSING
+══════════════════════════════════════════════════════════ -->
+<div id="tab-nurse" class="panel">
+  <!-- SEARCH -->
+  <div class="card">
+    <div class="sbadge s2">🩺 Station 2 — Nursing Staff</div>
+    <div class="card-title">🔍 Search Patient by Card No</div>
+    <div class="search-bar">
+      <input type="text" id="n-search" placeholder="Type Card No and press Enter…" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')nurseSearch()">
+      <button class="btn btn-blue" onclick="nurseSearch()">Search</button>
+      <button class="btn" onclick="clearNursePanel()">Clear</button>
+    </div>
+    <div id="n-info"></div>
+  </div>
+  <!-- VITALS FORM (shown after search OR after clicking Edit in list) -->
+  <div class="card" id="n-form" style="display:none">
+    <div class="card-title">💉 Enter Vitals for: <span id="n-form-title" style="color:var(--teal)"></span></div>
+    <div class="sdiv">Basic Vitals</div>
+    <div class="grid g3">
+      <div class="field">
+        <label>Blood Pressure (BP) <span class="req">*</span></label>
+        <input type="text" id="n-bp" placeholder="e.g. 120/80 mmHg">
+        <div class="hint">Format: systolic/diastolic</div>
+      </div>
+      <div class="field">
+        <label>Pulse (bpm) <span class="req">*</span></label>
+        <input type="number" id="n-pulse" placeholder="e.g. 72" min="30" max="250">
+        <div class="hint">Normal: 60–100 bpm</div>
+      </div>
+      <div class="field">
+        <label>Temperature (°F) <span class="req">*</span></label>
+        <input type="number" id="n-temp" placeholder="e.g. 98.6" step="0.1" min="90" max="110">
+        <div class="hint">Normal: 97–99°F</div>
+      </div>
+    </div>
+    <div class="grid g3">
+      <div class="field">
+        <label>Random Blood Sugar (RBS) <span class="req">*</span></label>
+        <input type="text" id="n-rbs" placeholder="e.g. 110 mg/dL">
+      </div>
+      <div class="field">
+        <label>Height (cm) <span class="req">*</span></label>
+        <input type="number" id="n-height" placeholder="e.g. 165" min="50" max="250" oninput="calcBMI()">
+        <div class="hint">Enter in centimetres</div>
+      </div>
+      <div class="field">
+        <label>Weight (kg) <span class="req">*</span></label>
+        <input type="number" id="n-weight" placeholder="e.g. 70" step="0.1" min="1" max="300" oninput="calcBMI()">
+        <div class="hint">Enter in kilograms</div>
+      </div>
+    </div>
+    <!-- BMI Result -->
+    <div id="bmi-result" style="display:none;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:4px">BMI Result</div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div id="bmi-value" style="font-size:28px;font-weight:700;color:#1e3a5f"></div>
+        <div id="bmi-badge" class="bmi-badge"></div>
+        <div id="bmi-range" style="font-size:12px;color:var(--muted)"></div>
+      </div>
+      <div id="bmi-bar-wrap" style="margin-top:8px;background:#f0f0f5;border-radius:4px;height:8px;overflow:hidden">
+        <div id="bmi-bar" style="height:8px;border-radius:4px;transition:width .4s,background .4s"></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="saveVitals()">✓ Save Vitals</button>
+      <button class="btn" onclick="clearNurseForm()">Clear</button>
+    </div>
+  </div>
+  <!-- PATIENT LIST for Nurse -->
+  <div class="card">
+    <div class="card-title">📋 Today's Patients (<span id="today-label-nurse"></span>) — click Edit to fill vitals</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Card No</th><th>Name</th><th>Age</th><th>Gender</th><th>Mobile</th><th>BP</th><th>Pulse</th><th>Temp</th><th>RBS</th><th>BMI</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="nurse-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 3 — MEDICAL OFFICER
+══════════════════════════════════════════════════════════ -->
+<div id="tab-mo" class="panel">
+  <div class="card">
+    <div class="sbadge s3">👨‍⚕️ Station 3 — Medical Officer</div>
+    <div class="card-title">🔍 Search Patient by Card No</div>
+    <div class="search-bar">
+      <input type="text" id="m-search" placeholder="Type Card No and press Enter…" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')moSearch()">
+      <button class="btn btn-blue" onclick="moSearch()">Search</button>
+      <button class="btn" onclick="clearMOPanel()">Clear</button>
+    </div>
+    <div id="m-info"></div>
+  </div>
+  <!-- MO FORM -->
+  <div class="card" id="m-form" style="display:none">
+    <div class="card-title">📝 Consultation: <span id="m-form-title" style="color:var(--purple)"></span></div>
+
+    <!-- Patient + Vitals summary for MO -->
+    <div id="m-vitals-summary" style="background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);padding:12px 16px;margin-bottom:14px;font-size:13px"></div>
+
+    <!-- TRIAGE -->
+    <div class="sdiv">Patient Triage <span style="color:var(--red);font-size:12px;font-weight:600">* Required</span></div>
+    <div class="triage-row">
+      <button class="triage-btn t-green" id="tri-green" onclick="setTriage('green')">
+        <span class="triage-dot dot-g"></span> Green — Healthy / No action required
+      </button>
+      <button class="triage-btn t-yellow" id="tri-yellow" onclick="setTriage('yellow')">
+        <span class="triage-dot dot-y"></span> Yellow — Moderate / Monitor
+      </button>
+      <button class="triage-btn t-red" id="tri-red" onclick="setTriage('red')">
+        <span class="triage-dot dot-r"></span> Red — Requires Doctor Consultation
+      </button>
+    </div>
+    <div id="triage-hint" style="font-size:12px;color:var(--muted);margin-bottom:12px"></div>
+
+    <!-- HISTORY -->
+    <div class="sdiv">Medical History</div>
+    <div class="grid g2">
+      <div class="field">
+        <label>Regular Medication</label>
+        <textarea id="m-meds" placeholder="List current medications, dosage..."></textarea>
+      </div>
+      <div class="field">
+        <label>Family Physician Name</label>
+        <input type="text" id="m-fp" placeholder="Dr. name">
+      </div>
+    </div>
+    <div class="grid g2">
+      <div class="field">
+        <label>Past Surgery / Major Illness</label>
+        <input type="text" id="m-surgery" placeholder="If none, leave blank">
+      </div>
+      <div class="field">
+        <label>Referral Specialty</label>
+        <select id="m-referral">
+          <option value="">-- None / Not Required --</option>
+          <option>Bariatrics</option>
+          <option>Cardiology</option>
+          <option>Critical Care</option>
+          <option>ENT</option>
+          <option>General Surgery</option>
+          <option>GI Surgery</option>
+          <option>Gynaecology</option>
+          <option>Joint Replacement</option>
+          <option>Medicine (Physician)</option>
+          <option>Nephrology (without dialysis)</option>
+          <option>Neurology</option>
+          <option>Oncology</option>
+          <option>Ophthalmology</option>
+          <option>Orthopaedic</option>
+          <option>Urology</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- TESTS -->
+    <div class="sdiv">Tests &amp; Investigations Required</div>
+    <div class="check-grid" id="check-grid">
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-hc"> Require Health Checkup</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-bi"> Require Blood Investigation</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-dp"> Diabetic Profile</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-cp"> Cardiac Profile</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-echo"> 2D Echo / TMT</label>
+      <label class="check-item" onclick="toggleCheck(this)"><input type="checkbox" id="m-vit"> Vitamin Tests</label>
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label>Blood Investigation Details</label>
+      <input type="text" id="m-bi-detail" placeholder="e.g. CBC, LFT, KFT, HbA1c, Lipid Profile...">
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label>Medical Officer Remarks</label>
+      <textarea id="m-remarks" placeholder="Clinical observations, advice, follow-up instructions..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-blue" onclick="saveMO()">✓ Save Consultation</button>
+      <button class="btn btn-green" onclick="printSummary()">🖨 Print Summary</button>
+      <button class="btn" onclick="clearMOForm()">Clear</button>
+    </div>
+  </div>
+
+  <!-- PATIENT LIST for MO — only vitals_done + consultation_done -->
+  <div class="card">
+    <div class="card-title">📋 Today's Patients with Vitals (<span id="today-label-mo"></span>) — click Edit to consult</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Card No</th><th>Name</th><th>Age</th><th>Gender</th><th>BP</th><th>Pulse</th><th>Temp</th><th>RBS</th><th>BMI</th><th>Triage</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="mo-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 4 — ALL RECORDS
+══════════════════════════════════════════════════════════ -->
+<div id="tab-all" class="panel">
+  <div class="card">
+    <div class="card-title">📊 All Patient Records</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <input type="text" id="filter-text" placeholder="Search name or card no..." style="flex:1;min-width:160px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none" oninput="refreshAll()">
+      <select id="filter-status" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none" onchange="refreshAll()">
+        <option value="">All Statuses</option>
+        <option value="registered">Registered</option>
+        <option value="vitals_done">Vitals Done</option>
+        <option value="consultation_done">Consultation Done</option>
+      </select>
+      <select id="filter-date" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;outline:none" onchange="refreshAll()">
+        <option value="today">📅 Today only</option>
+        <option value="all">📋 All dates</option>
+      </select>
+      <button class="btn btn-green" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn" style="color:var(--red);border-color:var(--red-border)" onclick="clearAll()">🗑 Clear All</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Card No</th><th>Name</th><th>Age</th><th>Gender</th><th>Mobile</th><th>BP</th><th>Pulse</th><th>Temp°F</th><th>RBS</th><th>BMI</th><th>Triage</th><th>Referral</th><th>Status</th><th>Print</th></tr></thead>
+        <tbody id="all-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- end app-body -->
+
+<div id="sync-toast"></div>
+</div><!-- end app-root -->
+
+<!-- INFO MODAL -->
+<div class="modal-overlay" id="info-modal" style="display:none" onclick="if(event.target===this)closeInfo()">
+  <div class="modal">
+    <h2>ℹ App Info &amp; Sync Status</h2>
+    <div id="modal-status" style="margin-bottom:12px;font-size:13px"></div>
+    <div style="background:#f8f9fb;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:13px">
+      <div style="margin-bottom:8px"><div style="font-size:11px;color:var(--muted);margin-bottom:2px">CAMP NAME</div><strong id="modal-camp"></strong></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:2px">GOOGLE SCRIPT URL</div><span id="modal-url" style="word-break:break-all;font-size:12px;font-family:monospace;color:#374151"></span></div>
+    </div>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:14px">
+      To change settings: open <code>index.html</code> → edit the 2 config lines at top of &lt;script&gt; → save → upload to GitHub.
+    </div>
+    <button class="btn btn-blue" onclick="closeInfo()" style="width:100%">Close</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  ✏️  EDIT ONLY THESE TWO LINES — then save and upload to GitHub
+// ═══════════════════════════════════════════════════════════════
+var SHEET_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+var CAMP_NAME = 'Health Camp 2026';
+// ═══════════════════════════════════════════════════════════════
+
+var patients = {};
+var activeNurseCard = null;
+var activeMOCard    = null;
+var activeTriage    = '';
+
+// ── INIT ───────────────────────────────────────────────────────
+function init() {
+  try { patients = JSON.parse(localStorage.getItem('hc_pts') || '{}'); } catch(e){ patients={}; }
+  var ok = isConfigured();
+  document.getElementById('setup-banner').style.display = ok ? 'none' : 'flex';
+  document.getElementById('header-sub').textContent = CAMP_NAME + ' · ' + new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  // Set today date labels
+  var tl = new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  ['today-label','today-label-nurse','today-label-mo'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.textContent = tl;
+  });
+  refreshAll_reg();
+  updateCounts();
+  // Auto-pull from Google Sheets on every page load
+  if (ok) pullFromSheet();
+}
+
+// ── PULL ALL DATA FROM GOOGLE SHEETS ──────────────────────────────────────────
+function pullFromSheet() {
+  showToast('syncing', '☁ Loading data from Google Sheets...');
+  // Use POST with no-cors for the pull request — Apps Script returns data via redirect URL
+  // We use a script.google.com URL with callback approach via JSONP-style GET
+  var url = SHEET_URL + '?action=get_all&camp=' + encodeURIComponent(CAMP_NAME) + '&callback=hcCallback&t=' + Date.now();
+
+  // JSONP approach — inject a script tag to bypass CORS
+  window._hcPullResolve = null;
+  var timeoutId = setTimeout(function(){
+    cleanup();
+    console.warn('[Pull] Timeout — working with local data');
+    document.getElementById('sync-toast').className = '';
+  }, 8000);
+
+  function cleanup(){
+    clearTimeout(timeoutId);
+    var old = document.getElementById('hc-pull-script');
+    if (old) old.parentNode.removeChild(old);
+    delete window.hcCallback;
+    delete window._hcPullResolve;
+  }
+
+  window.hcCallback = function(data) {
+    cleanup();
+    if (data && data.success && data.patients && data.patients.length > 0) {
+      var count = 0;
+      data.patients.forEach(function(p){
+        if (p.card) {
+          // Preserve reg_date if not set (use date field from sheet)
+          if (!p.reg_date && p.date) p.reg_date = p.date;
+          patients[p.card] = p;
+          count++;
+        }
+      });
+      persist();
+      refreshAll_reg(); refreshNurseList(); refreshMOList(); refreshAll(); updateCounts();
+      showToast('synced', '✓ Loaded ' + count + ' patients from Google Sheets');
+      console.log('[Pull] Loaded', count, 'patients via JSONP');
+    } else {
+      document.getElementById('sync-toast').className = '';
+      console.log('[Pull] No patients returned or empty sheet');
+    }
+  };
+
+  var script = document.createElement('script');
+  script.id  = 'hc-pull-script';
+  script.src = url;
+  script.onerror = function(){
+    cleanup();
+    console.warn('[Pull] Script load failed');
+    document.getElementById('sync-toast').className = '';
+  };
+  document.head.appendChild(script);
+}
+
+function persist() { localStorage.setItem('hc_pts', JSON.stringify(patients)); }
+
+function isConfigured() { return SHEET_URL && SHEET_URL.indexOf('script.google.com') !== -1; }
+
+// ── SORTED KEYS (descending Card No) ───────────────────────────
+// ── TODAY'S DATE KEY ──────────────────────────────────────────
+function todayKey() {
+  return new Date().toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+}
+
+// Returns today's date in multiple formats for matching
+function isToday(p) {
+  var today = new Date();
+  var d = today.getDate();
+  var m = today.getMonth() + 1;
+  var y = today.getFullYear();
+  // Build multiple format variants to match how registration time is stored
+  var variants = [
+    d+'/'+m+'/'+y,
+    (d<10?'0'+d:d)+'/'+(m<10?'0'+m:m)+'/'+y,
+    new Date().toLocaleDateString('en-IN'),
+    new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
+    new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}),
+  ];
+  // Check against registration date stored in patient.reg_date
+  if (p.reg_date) {
+    for (var i=0; i<variants.length; i++) {
+      if (p.reg_date === variants[i]) return true;
+    }
+  }
+  // Fallback: if no reg_date (old records), show them too
+  return !p.reg_date;
+}
+
+function sortedCards(subset) {
+  var list = (subset || Object.values(patients)).filter(isToday);
+  return list.sort(function(a,b){
+    var na = parseInt((a.card.match(/\d+/) || ['0'])[0]);
+    var nb = parseInt((b.card.match(/\d+/) || ['0'])[0]);
+    if (na !== nb) return nb - na;
+    return b.card.localeCompare(a.card);
+  });
+}
+
+// All records (ignores date filter — used for CSV export and full sync)
+function allCards() {
+  return Object.values(patients).sort(function(a,b){
+    var na = parseInt((a.card.match(/\d+/) || ['0'])[0]);
+    var nb = parseInt((b.card.match(/\d+/) || ['0'])[0]);
+    if (na !== nb) return nb - na;
+    return b.card.localeCompare(a.card);
+  });
+}
+
+// ── TABS ───────────────────────────────────────────────────────
+function showTab(id, el) {
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+  el.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if (id==='nurse') refreshNurseList();
+  if (id==='mo')    refreshMOList();
+  if (id==='all')   refreshAll();
+  updateCounts();
+}
+
+function updateCounts() {
+  var today = Object.values(patients).filter(isToday);
+  var all   = Object.values(patients);
+  document.getElementById('cnt-reg').textContent   = today.length;
+  document.getElementById('cnt-all').textContent   = all.length;
+  document.getElementById('cnt-nurse').textContent = today.filter(function(p){return p.status==='vitals_done'||p.status==='consultation_done';}).length;
+  document.getElementById('cnt-mo').textContent    = today.filter(function(p){return p.status==='consultation_done';}).length;
+}
+
+// ── ALERTS ─────────────────────────────────────────────────────
+var alertTimer;
+function showAlert(msg,type){
+  var b=document.getElementById('g-alert');
+  b.innerHTML='<div class="alert alert-'+(type||'success')+'">'+msg+'</div>';
+  b.style.display='block';
+  clearTimeout(alertTimer);
+  alertTimer=setTimeout(function(){b.style.display='none';},4000);
+}
+
+// ── REGISTRATION ───────────────────────────────────────────────
+function registerPatient() {
+  var card   = document.getElementById('r-card').value.trim().toUpperCase();
+  var name   = document.getElementById('r-name').value.trim();
+  var age    = document.getElementById('r-age').value.trim();
+  var mobile = document.getElementById('r-mobile').value.trim();
+  var gender = (document.querySelector('input[name="r-gender"]:checked')||{}).value||'';
+
+  // clear errors
+  ['r-card','r-name','r-age','r-mobile'].forEach(function(id){document.getElementById(id).classList.remove('err');});
+  document.getElementById('rr-gender').classList.remove('err');
+
+  var errors=[];
+  if(!card){errors.push('Card No');document.getElementById('r-card').classList.add('err');}
+  if(!name){errors.push('Patient Name');document.getElementById('r-name').classList.add('err');}
+  if(!age||isNaN(age)||Number(age)<1||Number(age)>120){errors.push('Age (1–120)');document.getElementById('r-age').classList.add('err');}
+  if(!gender){errors.push('Gender');document.getElementById('rr-gender').classList.add('err');}
+  if(!mobile||mobile.length!==10||!/^[6-9]\d{9}$/.test(mobile)){errors.push('Mobile No (valid 10-digit)');document.getElementById('r-mobile').classList.add('err');}
+
+  if(errors.length){showAlert('⚠ Required: <strong>'+errors.join(', ')+'</strong>','danger');return;}
+  if(patients[card]){document.getElementById('r-card').classList.add('err');showAlert('⚠ Card No <strong>'+card+'</strong> already registered!','danger');return;}
+
+  patients[card]={
+    card:card,name:name,age:age,gender:gender,mobile:mobile,
+    bp:'',rbs:'',pulse:'',temp:'',height:'',weight:'',bmi:'',bmi_cat:'',
+    meds:'',fp:'',surgery:'',referral:'',triage:'',
+    hc:false,bi:false,bi_detail:'',dp:false,cp:false,echo:false,vit:false,
+    remarks:'',status:'registered',
+    reg_date:new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
+    time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
+  };
+  persist();
+  showAlert('✓ Patient <strong>'+name+'</strong> registered ('+card+')');
+  clearReg(); refreshAll_reg(); updateCounts();
+  syncToSheet(patients[card]);
+}
+
+function clearReg(){
+  ['r-card','r-name','r-age','r-mobile'].forEach(function(id){var el=document.getElementById(id);el.value='';el.classList.remove('err');});
+  document.querySelectorAll('input[name="r-gender"]').forEach(function(r){r.checked=false;});
+  document.getElementById('rr-gender').classList.remove('err');
+}
+
+function refreshAll_reg(){
+  var list=sortedCards();
+  document.getElementById('reg-tbody').innerHTML=list.length===0
+    ?'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No patients registered yet</td></tr>'
+    :list.map(function(p){return'<tr><td><strong>'+p.card+'</strong></td><td>'+p.name+'</td><td>'+(p.age||'-')+'</td><td>'+(p.gender||'-')+'</td><td>'+(p.mobile||'-')+'</td><td>'+p.time+'</td><td>'+sPill(p.status)+'</td></tr>';}).join('');
+}
+
+// ── STATUS PILLS ───────────────────────────────────────────────
+function sPill(s){
+  if(s==='consultation_done')return'<span class="spill sp-done">✓ Consult done</span>';
+  if(s==='vitals_done')return'<span class="spill sp-vit">💉 Vitals done</span>';
+  return'<span class="spill sp-reg">🪪 Registered</span>';
+}
+function triPill(t){
+  if(t==='green')return'<span class="tri-pill tri-g">🟢 Healthy</span>';
+  if(t==='yellow')return'<span class="tri-pill tri-y">🟡 Moderate</span>';
+  if(t==='red')return'<span class="tri-pill tri-r">🔴 Doctor needed</span>';
+  return'-';
+}
+
+// ── BMI CALCULATOR ─────────────────────────────────────────────
+function calcBMI(){
+  var h=parseFloat(document.getElementById('n-height').value);
+  var w=parseFloat(document.getElementById('n-weight').value);
+  var res=document.getElementById('bmi-result');
+  if(!h||!w||h<50||w<1){res.style.display='none';return;}
+  var bmi=w/((h/100)*(h/100));
+  var bmiR=Math.round(bmi*10)/10;
+  var cat,cls,range,color,pct;
+  if(bmi<18.5){cat='Underweight';cls='bmi-under';range='BMI < 18.5';color='#d97706';pct=Math.round((bmi/18.5)*30);}
+  else if(bmi<25){cat='Normal Weight';cls='bmi-normal';range='BMI 18.5 – 24.9';color='#16a34a';pct=Math.round(30+(bmi-18.5)/(25-18.5)*30);}
+  else if(bmi<30){cat='Overweight';cls='bmi-over';range='BMI 25 – 29.9';color='#ea580c';pct=Math.round(60+(bmi-25)/5*20);}
+  else{cat='Obese';cls='bmi-obese';range='BMI ≥ 30';color='#dc2626';pct=Math.min(95,Math.round(80+(bmi-30)/10*15));}
+  document.getElementById('bmi-value').textContent=bmiR;
+  document.getElementById('bmi-badge').className='bmi-badge '+cls;
+  document.getElementById('bmi-badge').textContent=cat;
+  document.getElementById('bmi-range').textContent=range;
+  document.getElementById('bmi-bar').style.width=pct+'%';
+  document.getElementById('bmi-bar').style.background=color;
+  res.style.display='block';
+  // store for save
+  document.getElementById('n-height')._bmi=bmiR;
+  document.getElementById('n-height')._bmi_cat=cat;
+}
+
+// ── NURSE SEARCH ───────────────────────────────────────────────
+function nurseSearch(){
+  var card=document.getElementById('n-search').value.trim().toUpperCase();
+  if(!card){showAlert('Enter a Card No to search','danger');return;}
+  var p=patients[card];
+  if(!p){
+    document.getElementById('n-info').innerHTML='<div class="alert alert-danger">⚠ No patient found for Card No: <strong>'+card+'</strong></div>';
+    document.getElementById('n-form').style.display='none';return;
+  }
+  loadNurseForm(card);
+}
+
+function loadNurseForm(card){
+  var p=patients[card];
+  activeNurseCard=card;
+  document.getElementById('n-info').innerHTML=ptChip(p,'nurse');
+  document.getElementById('n-form-title').textContent=p.name+' ('+card+')';
+  document.getElementById('n-bp').value=p.bp||'';
+  document.getElementById('n-pulse').value=p.pulse||'';
+  document.getElementById('n-temp').value=p.temp||'';
+  document.getElementById('n-rbs').value=p.rbs||'';
+  document.getElementById('n-height').value=p.height||'';
+  document.getElementById('n-weight').value=p.weight||'';
+  document.getElementById('n-form').style.display='block';
+  document.getElementById('bmi-result').style.display='none';
+  if(p.height&&p.weight)calcBMI();
+  // clear err states
+  ['n-bp','n-pulse','n-temp','n-rbs','n-height','n-weight'].forEach(function(id){document.getElementById(id).classList.remove('err');});
+  document.getElementById('n-form').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function clearNursePanel(){
+  activeNurseCard=null;
+  document.getElementById('n-search').value='';
+  document.getElementById('n-info').innerHTML='';
+  document.getElementById('n-form').style.display='none';
+  document.getElementById('bmi-result').style.display='none';
+}
+
+function clearNurseForm(){
+  ['n-bp','n-pulse','n-temp','n-rbs','n-height','n-weight'].forEach(function(id){var el=document.getElementById(id);el.value='';el.classList.remove('err');});
+  document.getElementById('bmi-result').style.display='none';
+}
+
+// ── SAVE VITALS ────────────────────────────────────────────────
+function saveVitals(){
+  if(!activeNurseCard){showAlert('Search a patient first','danger');return;}
+  var bp    =document.getElementById('n-bp').value.trim();
+  var pulse =document.getElementById('n-pulse').value.trim();
+  var temp  =document.getElementById('n-temp').value.trim();
+  var rbs   =document.getElementById('n-rbs').value.trim();
+  var height=document.getElementById('n-height').value.trim();
+  var weight=document.getElementById('n-weight').value.trim();
+
+  ['n-bp','n-pulse','n-temp','n-rbs','n-height','n-weight'].forEach(function(id){document.getElementById(id).classList.remove('err');});
+  var errors=[];
+  if(!bp||!/^\d{2,3}\/\d{2,3}/.test(bp)){errors.push('BP (format: 120/80)');document.getElementById('n-bp').classList.add('err');}
+  if(!pulse||pulse<30||pulse>250){errors.push('Pulse (30–250 bpm)');document.getElementById('n-pulse').classList.add('err');}
+  if(!temp||temp<90||temp>110){errors.push('Temperature (90–110°F)');document.getElementById('n-temp').classList.add('err');}
+  if(!rbs){errors.push('RBS');document.getElementById('n-rbs').classList.add('err');}
+  if(!height||height<50||height>250){errors.push('Height (50–250 cm)');document.getElementById('n-height').classList.add('err');}
+  if(!weight||weight<1||weight>300){errors.push('Weight (1–300 kg)');document.getElementById('n-weight').classList.add('err');}
+  if(errors.length){showAlert('⚠ Check these fields: <strong>'+errors.join(', ')+'</strong>','danger');return;}
+
+  var bmiVal = document.getElementById('n-height')._bmi || '';
+  var bmiCat = document.getElementById('n-height')._bmi_cat || '';
+
+  var p=patients[activeNurseCard];
+  p.bp=bp; p.pulse=pulse; p.temp=temp; p.rbs=rbs;
+  p.height=height; p.weight=weight; p.bmi=bmiVal; p.bmi_cat=bmiCat;
+  p.status='vitals_done';
+  persist(); refreshAll_reg(); refreshNurseList(); updateCounts();
+  showAlert('✓ Vitals saved for <strong>'+p.name+'</strong>');
+  syncToSheet(p);
+}
+
+// ── NURSE PATIENT LIST ─────────────────────────────────────────
+function refreshNurseList(){
+  var list=sortedCards();
+  document.getElementById('nurse-tbody').innerHTML=list.length===0
+    ?'<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:20px">No patients registered yet</td></tr>'
+    :list.map(function(p){
+      return'<tr><td><strong>'+p.card+'</strong></td><td>'+p.name+'</td><td>'+(p.age||'-')+'</td><td>'+(p.gender||'-')+'</td><td>'+(p.mobile||'-')+'</td><td>'+(p.bp||'-')+'</td><td>'+(p.pulse?p.pulse+' bpm':'-')+'</td><td>'+(p.temp?p.temp+'°F':'-')+'</td><td>'+(p.rbs||'-')+'</td><td>'+(p.bmi?p.bmi+' <small style=color:var(--muted)>('+p.bmi_cat+')</small>':'-')+'</td><td>'+sPill(p.status)+'</td><td><button class="edit-btn nurse-edit" data-card="'+p.card+'">✏ Edit Vitals</button></td></tr>';
+    }).join('');
+}
+
+// nurseEditFromList handled by event delegation
+
+// ── PATIENT CHIP ───────────────────────────────────────────────
+function ptChip(p, mode){
+  var vitals = mode==='mo' ?
+    '<div class="inf"><strong>'+(p.bp||'-')+'</strong>BP</div><div class="inf"><strong>'+(p.pulse?p.pulse+' bpm':'-')+'</strong>Pulse</div><div class="inf"><strong>'+(p.temp?p.temp+'°F':'-')+'</strong>Temp</div><div class="inf"><strong>'+(p.rbs||'-')+'</strong>RBS</div><div class="inf"><strong>'+(p.bmi||'-')+'</strong>BMI</div>' : '';
+  return '<div class="pt-chip"><div class="cno">'+p.card+'</div><div class="inf"><strong>'+p.name+'</strong>Patient</div><div class="inf"><strong>'+(p.age||'-')+'</strong>Age</div><div class="inf"><strong>'+(p.gender||'-')+'</strong>Gender</div><div class="inf"><strong>'+(p.mobile||'-')+'</strong>Mobile</div>'+vitals+'</div>';
+}
+
+// ── MO SEARCH ──────────────────────────────────────────────────
+function moSearch(){
+  var card=document.getElementById('m-search').value.trim().toUpperCase();
+  if(!card){showAlert('Enter a Card No to search','danger');return;}
+  var p=patients[card];
+  if(!p){
+    document.getElementById('m-info').innerHTML='<div class="alert alert-danger">⚠ No patient found for Card No: <strong>'+card+'</strong></div>';
+    document.getElementById('m-form').style.display='none';return;
+  }
+  if(p.status==='registered'){
+    document.getElementById('m-info').innerHTML='<div class="alert alert-info">ℹ Patient <strong>'+p.name+'</strong> has not had vitals recorded yet. Please send to Nursing station first.</div>';
+    document.getElementById('m-form').style.display='none';return;
+  }
+  loadMOForm(card);
+}
+
+function loadMOForm(card){
+  var p=patients[card];
+  activeMOCard=card;
+  activeTriage=p.triage||'';
+  document.getElementById('m-info').innerHTML=ptChip(p,'mo');
+  document.getElementById('m-form-title').textContent=p.name+' ('+card+')';
+  // vitals summary for MO
+  document.getElementById('m-vitals-summary').innerHTML=
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px">'+
+    vCard('BP',p.bp)+vCard('Pulse',p.pulse?p.pulse+' bpm':'')+vCard('Temp',p.temp?p.temp+'°F':'')+
+    vCard('RBS',p.rbs)+vCard('Height',p.height?p.height+' cm':'')+vCard('Weight',p.weight?p.weight+' kg':'')+
+    vCard('BMI',p.bmi?p.bmi+' ('+p.bmi_cat+')':'')+
+    '</div>';
+  // load triage
+  setTriage(p.triage||'');
+  // load form fields
+  document.getElementById('m-meds').value=p.meds||'';
+  document.getElementById('m-fp').value=p.fp||'';
+  document.getElementById('m-surgery').value=p.surgery||'';
+  document.getElementById('m-referral').value=p.referral||'';
+  document.getElementById('m-hc').checked=p.hc;toggleCheckById('m-hc');
+  document.getElementById('m-bi').checked=p.bi;toggleCheckById('m-bi');
+  document.getElementById('m-dp').checked=p.dp;toggleCheckById('m-dp');
+  document.getElementById('m-cp').checked=p.cp;toggleCheckById('m-cp');
+  document.getElementById('m-echo').checked=p.echo;toggleCheckById('m-echo');
+  document.getElementById('m-vit').checked=p.vit;toggleCheckById('m-vit');
+  document.getElementById('m-bi-detail').value=p.bi_detail||'';
+  document.getElementById('m-remarks').value=p.remarks||'';
+  document.getElementById('m-form').style.display='block';
+  document.getElementById('m-form').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function vCard(label,val){
+  return'<div style="background:#fff;border:1px solid var(--border);border-radius:6px;padding:8px 12px"><div style="font-size:11px;color:var(--muted);margin-bottom:2px">'+label+'</div><div style="font-size:14px;font-weight:600;color:#1e3a5f">'+(val||'—')+'</div></div>';
+}
+
+function clearMOPanel(){
+  activeMOCard=null; activeTriage='';
+  document.getElementById('m-search').value='';
+  document.getElementById('m-info').innerHTML='';
+  document.getElementById('m-form').style.display='none';
+  setTriage('');
+}
+
+function clearMOForm(){
+  ['m-meds','m-fp','m-surgery','m-bi-detail','m-remarks'].forEach(function(id){document.getElementById(id).value='';});
+  ['m-hc','m-bi','m-dp','m-cp','m-echo','m-vit'].forEach(function(id){document.getElementById(id).checked=false;toggleCheckById(id);});
+  document.getElementById('m-referral').value='';
+  setTriage('');
+}
+
+// ── TRIAGE ─────────────────────────────────────────────────────
+function setTriage(val){
+  activeTriage=val;
+  ['green','yellow','red'].forEach(function(col){
+    document.getElementById('tri-'+col).classList.toggle('active',col===val);
+  });
+  var hints={
+    green:'✅ Patient is healthy. No further action required.',
+    yellow:'⚠ Moderate condition. Recommend follow-up or monitoring.',
+    red:'🚨 Requires immediate doctor consultation or referral.'
+  };
+  var hint = document.getElementById('triage-hint');
+  hint.textContent = val ? hints[val] : '⚠ Triage is required — select Green, Yellow or Red';
+  hint.style.color = val ? '' : 'var(--red)';
+  hint.style.fontWeight = val ? '' : '600';
+  // Clear error outline if a value is selected
+  if (val) {
+    document.querySelector('.triage-row').style.outline = '';
+    document.querySelector('.triage-row').style.borderRadius = '';
+  }
+}
+
+// ── SAVE MO ─────────────────────────────────────────────────────
+function saveMO(){
+  if(!activeMOCard)return;
+  // Triage is mandatory
+  if(!activeTriage){
+    // Highlight triage buttons area
+    document.getElementById('triage-hint').textContent = '⚠ Please select a triage status (Green, Yellow or Red) before saving.';
+    document.getElementById('triage-hint').style.color = 'var(--red)';
+    document.getElementById('triage-hint').style.fontWeight = '600';
+    document.querySelector('.triage-row').style.outline = '2px solid var(--red)';
+    document.querySelector('.triage-row').style.borderRadius = '8px';
+    document.querySelector('.triage-row').scrollIntoView({behavior:'smooth', block:'center'});
+    showAlert('⚠ Triage selection is required — choose Green, Yellow or Red', 'danger');
+    return;
+  }
+  // Clear any triage error styling
+  document.getElementById('triage-hint').style.color = '';
+  document.getElementById('triage-hint').style.fontWeight = '';
+  document.querySelector('.triage-row').style.outline = '';
+  var p=patients[activeMOCard];
+  p.triage=activeTriage;
+  p.meds=document.getElementById('m-meds').value;
+  p.fp=document.getElementById('m-fp').value;
+  p.surgery=document.getElementById('m-surgery').value;
+  p.referral=document.getElementById('m-referral').value;
+  p.hc=document.getElementById('m-hc').checked;
+  p.bi=document.getElementById('m-bi').checked;
+  p.bi_detail=document.getElementById('m-bi-detail').value;
+  p.dp=document.getElementById('m-dp').checked;
+  p.cp=document.getElementById('m-cp').checked;
+  p.echo=document.getElementById('m-echo').checked;
+  p.vit=document.getElementById('m-vit').checked;
+  p.remarks=document.getElementById('m-remarks').value;
+  p.status='consultation_done';
+  persist(); refreshAll_reg(); refreshNurseList(); refreshMOList(); updateCounts();
+  showAlert('✓ Consultation saved for <strong>'+p.name+'</strong>');
+  syncToSheet(p);
+}
+
+// ── MO PATIENT LIST ────────────────────────────────────────────
+function refreshMOList(){
+  var list=sortedCards().filter(function(p){return p.status==='vitals_done'||p.status==='consultation_done';});
+  document.getElementById('mo-tbody').innerHTML=list.length===0
+    ?'<tr><td colspan="12" style="text-align:center;color:var(--muted);padding:20px">No patients with vitals recorded yet</td></tr>'
+    :list.map(function(p){
+      return'<tr><td><strong>'+p.card+'</strong></td><td>'+p.name+'</td><td>'+(p.age||'-')+'</td><td>'+(p.gender||'-')+'</td><td>'+(p.bp||'-')+'</td><td>'+(p.pulse?p.pulse+' bpm':'-')+'</td><td>'+(p.temp?p.temp+'°F':'-')+'</td><td>'+(p.rbs||'-')+'</td><td>'+(p.bmi||'-')+'</td><td>'+triPill(p.triage)+'</td><td>'+sPill(p.status)+'</td><td><button class="edit-btn mo-edit" data-card="'+p.card+'">✏ Consult</button></td></tr>';
+    }).join('');
+}
+
+// moEditFromList handled by event delegation
+
+// ── ALL RECORDS ────────────────────────────────────────────────
+function refreshAll(){
+  var q=(document.getElementById('filter-text').value||'').toLowerCase();
+  var sf=document.getElementById('filter-status').value;
+  var dateFilter=document.getElementById('filter-date') ? document.getElementById('filter-date').value : 'today';
+  var base = dateFilter==='all' ? allCards() : sortedCards();
+  var list=base.filter(function(p){
+    return (!q||p.card.toLowerCase().includes(q)||p.name.toLowerCase().includes(q))&&(!sf||p.status===sf);
+  });
+  document.getElementById('all-tbody').innerHTML=list.length===0
+    ?'<tr><td colspan="14" style="text-align:center;color:var(--muted);padding:20px">No records</td></tr>'
+    :list.map(function(p){
+      return'<tr><td><strong>'+p.card+'</strong></td><td>'+p.name+'</td><td>'+(p.age||'-')+'</td><td>'+(p.gender||'-')+'</td><td>'+(p.mobile||'-')+'</td><td>'+(p.bp||'-')+'</td><td>'+(p.pulse?p.pulse+' bpm':'-')+'</td><td>'+(p.temp||'-')+'</td><td>'+(p.rbs||'-')+'</td><td>'+(p.bmi||'-')+'</td><td>'+triPill(p.triage)+'</td><td>'+(p.referral||'-')+'</td><td>'+sPill(p.status)+'</td><td><button class="edit-btn all-print" data-card="'+p.card+'">🖨</button></td></tr>';
+    }).join('');
+}
+
+// ── CHECKBOX ───────────────────────────────────────────────────
+function toggleCheck(label){setTimeout(function(){var cb=label.querySelector('input[type=checkbox]');label.classList.toggle('checked',cb.checked);},0);}
+function toggleCheckById(id){var cb=document.getElementById(id);if(cb)cb.closest('label').classList.toggle('checked',cb.checked);}
+
+// ── PRINT ──────────────────────────────────────────────────────
+function printSummary(){
+  if(!activeMOCard){showAlert('Search a patient first','danger');return;}
+  printCard(activeMOCard);
+}
+
+function printCard(card){
+  var p=patients[card];if(!p)return;
+  var tests=[p.hc?'Health Checkup':'',p.bi?'Blood Investigation':'',p.dp?'Diabetic Profile':'',p.cp?'Cardiac Profile':'',p.echo?'2D Echo/TMT':'',p.vit?'Vitamin Tests':''].filter(Boolean);
+  var date=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'});
+  var triColor={green:'#16a34a',yellow:'#d97706',red:'#dc2626'};
+  var triText={green:'&#128994; Green &mdash; Healthy',yellow:'&#128993; Yellow &mdash; Moderate',red:'&#128308; Red &mdash; Doctor Consultation Required'};
+  var triBg={green:'#f0fdf4',yellow:'#fffbeb',red:'#fef2f2'};
+  var triBorder={green:'#16a34a',yellow:'#d97706',red:'#dc2626'};
+
+  var logoSrc = document.querySelector('.header-logo img').src;
+
+  function row(lb,vl){return '<div class="vc"><div class="lb">'+lb+'</div><div class="vl">'+(vl||'&mdash;')+'</div></div>';}
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Summary &mdash; '+p.card+'</title><style>'
+    +'*{box-sizing:border-box;margin:0;padding:0}'
+    +'body{font-family:Arial,sans-serif;font-size:13px;color:#111;padding:24px 32px;max-width:760px;margin:0 auto}'
+    +'.hd{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #1e3a5f;padding-bottom:14px;margin-bottom:18px}'
+    +'.la{display:flex;align-items:center}.logo-bg{background:#fff;padding:2px 6px;border-radius:4px}'
+    +'.divider{border-left:2px solid #e0e0e8;margin-left:12px;padding-left:12px}'
+    +'.cno-box{background:#1e3a5f;color:#fff;padding:8px 16px;border-radius:8px;text-align:center;flex-shrink:0}'
+    +'.cno-box .cn{font-size:22px;font-weight:700}'
+    +'.sec{margin-bottom:14px}'
+    +'.st{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#1e3a5f;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px}'
+    +'.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}'
+    +'.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}'
+    +'.vc{background:#f8f9fb;border:1px solid #e8e8f0;border-radius:6px;padding:8px 12px}'
+    +'.lb{font-size:10px;color:#777;margin-bottom:2px}'
+    +'.vl{font-size:13px;font-weight:600}'
+    +'.tri-box{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:700;margin-bottom:10px;border:2px solid}'
+    +'.tests{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}'
+    +'.test-tag{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:3px 10px;border-radius:12px;font-size:12px}'
+    +'.remarks-box{background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:10px 14px;font-size:13px;min-height:50px;line-height:1.6}'
+    +'.sig{display:flex;justify-content:flex-end;margin-top:20px}'
+    +'.sig-inner{text-align:center;font-size:12px;color:#444}'
+    +'.sig-line{border-top:1.5px solid #333;width:200px;margin-bottom:4px}'
+    +'.footer{margin-top:14px;display:flex;justify-content:space-between;font-size:10px;color:#999;border-top:1px solid #eee;padding-top:8px}'
+    +'@media print{.no-print{display:none!important}}'
+    +'</style></head><body>';
+
+  // HEADER
+  html += '<div class="hd">'
+    +'<div class="la"><div class="logo-bg"><img src="'+logoSrc+'" style="height:52px;width:auto;object-fit:contain"></div>'
+    +'<div class="divider"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#888;margin-bottom:2px">Patient Health Summary</div>'
+    +'<div style="font-size:16px;font-weight:700;color:#1e3a5f">'+CAMP_NAME+'</div>'
+    +'<div style="font-size:11px;color:#666;margin-top:1px">'+date+'</div></div></div>'
+    +'<div class="cno-box"><div class="cn">'+p.card+'</div><div style="font-size:10px;opacity:.8">Card No</div></div>'
+    +'</div>';
+
+  // PATIENT INFO
+  html += '<div class="sec"><div class="st">Patient Information</div><div class="g3">'
+    +row('Full Name', p.name)
+    +row('Age / Gender', (p.age||'&mdash;')+' yrs / '+(p.gender||'&mdash;'))
+    +row('Mobile No', p.mobile)
+    +row('Family Physician', p.fp)
+    +row('Registration Time', p.time)
+    +'</div></div>';
+
+  // VITALS
+  html += '<div class="sec"><div class="st">Vitals (Recorded by Nurse)</div><div class="g3">'
+    +row('Blood Pressure (BP)', p.bp)
+    +row('Pulse', p.pulse ? p.pulse+' bpm' : '')
+    +row('Temperature', p.temp ? p.temp+'&deg;F' : '')
+    +row('RBS (Blood Sugar)', p.rbs)
+    +row('Height / Weight', (p.height ? p.height+' cm' : '&mdash;')+' / '+(p.weight ? p.weight+' kg' : '&mdash;'))
+    +row('BMI', p.bmi ? p.bmi+(p.bmi_cat ? ' ('+p.bmi_cat+')' : '') : '')
+    +'</div></div>';
+
+  // TRIAGE
+  if(p.triage){
+    html += '<div class="sec"><div class="st">Triage / Patient Status</div>'
+      +'<div class="tri-box" style="background:'+triBg[p.triage]+';border-color:'+triBorder[p.triage]+';color:'+triColor[p.triage]+'">'+triText[p.triage]+'</div>'
+      +'</div>';
+  }
+
+  // HISTORY
+  html += '<div class="sec"><div class="st">Medical History</div><div class="g2">'
+    +row('Regular Medication', p.meds||'None')
+    +row('Past Surgery / Illness', p.surgery||'None')
+    +'</div></div>';
+
+  // REFERRAL & TESTS
+  html += '<div class="sec"><div class="st">Referral &amp; Tests Advised</div>'
+    +row('Referral Specialty', p.referral||'None');
+  if(tests.length>0){
+    html += '<div class="tests">'+tests.map(function(t){return'<span class="test-tag">'+t+'</span>';}).join('')+'</div>';
+  }
+  if(p.bi_detail){
+    html += '<div style="margin-top:8px">'+row('Blood Investigation Details', p.bi_detail)+'</div>';
+  }
+  html += '</div>';
+
+  // REMARKS
+  html += '<div class="sec"><div class="st">Medical Officer Remarks</div>'
+    +'<div class="remarks-box">'+(p.remarks||'&mdash;')+'</div></div>';
+
+  // SIGNATURE
+  html += '<div class="sig"><div class="sig-inner"><div class="sig-line"></div>Medical Officer Signature</div></div>';
+
+  // FOOTER
+  html += '<div class="footer"><span>Card No: '+p.card+'</span><span>Camp: '+CAMP_NAME+'</span><span>Generated: '+new Date().toLocaleString('en-IN')+'</span></div>';
+
+  html += '<br><button class="no-print" onclick="window.print()" style="padding:10px 24px;background:#1e3a5f;color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer;margin-right:8px">&#128424; Print / Save PDF</button>';
+  html += '<button class="no-print" onclick="window.parent.closePrintFrame()" style="padding:10px 18px;background:#eee;border:none;border-radius:6px;font-size:14px;cursor:pointer">&#10006; Close</button>';
+  html += '</body></html>';
+
+  // Write into iframe instead of popup window
+  var frame = document.getElementById('print-frame');
+  var appRoot = document.getElementById('app-root');
+  if(!frame){
+    frame = document.createElement('div');
+    frame.id = 'print-frame';
+    frame.style.cssText = 'position:fixed;inset:0;background:#fff;z-index:9999;overflow:auto;padding:0';
+    var iframe = document.createElement('iframe');
+    iframe.id = 'print-iframe';
+    iframe.style.cssText = 'width:100%;height:100%;border:none';
+    frame.appendChild(iframe);
+    document.body.appendChild(frame);
+  }
+  frame.style.display = 'block';
+  if(appRoot) appRoot.style.display = 'none';
+  var iframe = document.getElementById('print-iframe');
+  iframe.srcdoc = html;
+}
+
+function exportCSV(){
+  var list=Object.values(patients);
+  if(!list.length){showAlert('No data to export','danger');return;}
+  var H=['Card No','Name','Age','Gender','Mobile','BP','Pulse (bpm)','Temp (°F)','RBS','Height (cm)','Weight (kg)','BMI','BMI Category','Triage','Regular Medication','Family Physician','Past Surgery','Referral Specialty','Health Checkup','Blood Investigation','Blood Inv. Details','Diabetic Profile','Cardiac Profile','2D Echo/TMT','Vitamin Tests','MO Remarks','Status','Time'];
+  var rows=[H].concat(list.map(function(p){return[p.card,p.name,p.age,p.gender,p.mobile,p.bp,p.pulse,p.temp,p.rbs,p.height,p.weight,p.bmi,p.bmi_cat,p.triage,p.meds,p.fp,p.surgery,p.referral,p.hc?'Yes':'No',p.bi?'Yes':'No',p.bi_detail,p.dp?'Yes':'No',p.cp?'Yes':'No',p.echo?'Yes':'No',p.vit?'Yes':'No',p.remarks,p.status,p.time];}));
+  var csv=rows.map(function(r){return r.map(function(c){var s=String(c||'').replace(/"/g,'""');return(s.indexOf(',')>-1||s.indexOf('"')>-1||s.indexOf('\n')>-1)?'"'+s+'"':s;}).join(',');}).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;
+  a.download=CAMP_NAME.replace(/\s+/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showAlert('✓ Exported '+list.length+' records to CSV');
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+function syncToSheet(p){
+  console.log('[Sync] isConfigured:', isConfigured(), 'URL:', SHEET_URL ? SHEET_URL.slice(0,60)+'...' : 'EMPTY');
+  if(!isConfigured()){
+    console.warn('[Sync] Skipped — SHEET_URL not set to a valid Google Script URL');
+    return;
+  }
+  showToast('syncing','☁ Syncing...');
+  var payload = JSON.stringify({
+    action: 'upsert',
+    camp: CAMP_NAME,
+    date: new Date().toLocaleDateString('en-IN'),
+    patient: p
+  });
+  console.log('[Sync] Sending payload for card:', p.card);
+  fetch(SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: payload
+  }).then(function(){
+    showToast('synced', '✓ Synced to Google Sheets');
+    console.log('[Sync] Done:', p.card);
+  }).catch(function(err){
+    showToast('error', '⚠ Sync failed — saved locally');
+    console.error('[Sync] Fetch error:', err);
+  });
+}
+function syncNow(){
+  if(!isConfigured()){
+    showAlert('⚠ Google Script URL not configured. Check SHEET_URL in index.html','danger');
+    return;
+  }
+  // Pull latest from sheet first, then push local
+  showToast('syncing', '☁ Syncing with Google Sheets...');
+  pullFromSheet();
+  var list = Object.values(patients);
+  if(list.length){
+    fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action:'sync_all', camp:CAMP_NAME, date:new Date().toLocaleDateString('en-IN'), patients:list})
+    }).then(function(){
+      showToast('synced', '✓ Sync complete — ' + list.length + ' records');
+    }).catch(function(err){
+      showToast('error', '⚠ Push failed — check connection');
+      console.error('[SyncNow] Push error:', err);
+    });
+  }
+}
+
+var toastTimer;
+function showToast(cls,msg){
+  var el=document.getElementById('sync-toast');
+  el.className='show '+cls;el.textContent=msg;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){el.className='';},4000);
+}
+
+// ── CLEAR ALL ──────────────────────────────────────────────────
+function clearAll(){
+  if(!confirm('Delete ALL patient data? This cannot be undone.'))return;
+  patients={};persist();refreshAll_reg();refreshAll();updateCounts();
+  showAlert('All records cleared');
+}
+
+// ── INFO MODAL ─────────────────────────────────────────────────
+function showInfo(){
+  document.getElementById('modal-camp').textContent=CAMP_NAME;
+  document.getElementById('modal-url').textContent=isConfigured()?SHEET_URL:'Not configured';
+  document.getElementById('modal-status').innerHTML=isConfigured()
+    ?'<span style="color:#16a34a;font-weight:600">✓ Google Sheets sync is active</span>'
+    :'<span style="color:#dc2626;font-weight:600">⚠ Not connected — edit SHEET_URL in index.html</span>';
+  document.getElementById('info-modal').style.display='flex';
+}
+function closeInfo(){document.getElementById('info-modal').style.display='none';}
+
+// ── PRINT FRAME CLOSE ───────────────────────────────────────────────────────
+window.closePrintFrame = function() {
+  var frame = document.getElementById('print-frame');
+  var root  = document.getElementById('app-root');
+  if (frame) frame.style.display = 'none';
+  if (root)  root.style.display  = '';
+};
+
+// ── START ──────────────────────────────────────────────────────
+init();
+
+// ── EVENT DELEGATION for dynamic table buttons ─────────────
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var card = btn.getAttribute('data-card');
+  if (!card) return;
+
+  if (btn.classList.contains('nurse-edit')) {
+    document.getElementById('n-search').value = card;
+    loadNurseForm(card);
+    // Switch to nurse tab
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    document.querySelectorAll('.tab')[0].classList.remove('active');
+    document.querySelectorAll('.tab')[2].classList.remove('active');
+    document.querySelectorAll('.tab')[3].classList.remove('active');
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+    document.getElementById('tab-nurse').classList.add('active');
+    setTimeout(function(){document.getElementById('n-form').scrollIntoView({behavior:'smooth',block:'start'});}, 150);
+  }
+
+  if (btn.classList.contains('mo-edit')) {
+    document.getElementById('m-search').value = card;
+    var p = patients[card];
+    if (!p) return;
+    if (p.status === 'registered') {
+      showAlert('⚠ Patient <strong>'+p.name+'</strong> has not had vitals recorded yet.', 'danger');
+      return;
+    }
+    loadMOForm(card);
+    // Switch to MO tab
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active')});
+    document.querySelectorAll('.tab')[2].classList.add('active');
+    document.getElementById('tab-mo').classList.add('active');
+    setTimeout(function(){document.getElementById('m-form').scrollIntoView({behavior:'smooth',block:'start'});}, 150);
+  }
+
+  if (btn.classList.contains('all-print')) {
+    printCard(card);
+  }
+});
+</script>
+</body>
+</html>
