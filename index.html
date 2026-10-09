@@ -532,58 +532,79 @@ function init() {
 }
 
 // ── PULL ALL DATA FROM GOOGLE SHEETS ──────────────────────────────────────────
-function pullFromSheet() {
-  showToast('syncing', '☁ Loading data from Google Sheets...');
-  // Use POST with no-cors for the pull request — Apps Script returns data via redirect URL
-  // We use a script.google.com URL with callback approach via JSONP-style GET
-  var url = SHEET_URL + '?action=get_all&camp=' + encodeURIComponent(CAMP_NAME) + '&callback=hcCallback&t=' + Date.now();
+// ── [A] REPLACE the whole pullFromSheet() function with ALL of this ────────
+//  (auto-refresh support, 20s timeout, visible error, keeps unsynced local edits)
 
-  // JSONP approach — inject a script tag to bypass CORS
-  window._hcPullResolve = null;
-  var timeoutId = setTimeout(function(){
-    cleanup();
-    console.warn('[Pull] Timeout — working with local data');
-    document.getElementById('sync-toast').className = '';
-  }, 8000);
+var _pulling = false, _waiters = [];
+var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function p2(n){ return (n < 10 ? '0' : '') + n; }
+function localKey(d){ d = d || new Date(); return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); }
+function todayStr(){ var d = new Date(); return d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear(); }
 
-  function cleanup(){
-    clearTimeout(timeoutId);
-    var old = document.getElementById('hc-pull-script');
-    if (old) old.parentNode.removeChild(old);
-    delete window.hcCallback;
-    delete window._hcPullResolve;
+function sig(p){
+  return [p.name,p.age,p.gender,p.mobile,p.status,p.bp,p.pulse,p.temp,p.rbs,p.height,p.weight,p.bmi,
+          p.triage,p.meds,p.fp,p.surgery,p.referral,p.bi_detail,p.remarks,p.hc,p.bi,p.dp,p.cp,p.echo,p.vit].join('|');
+}
+
+function setPullStatus(ok){
+  var el = document.getElementById('header-sub');
+  if (!el) return;
+  var base = CAMP_NAME + ' · ' + todayStr();
+  el.innerHTML = base + (ok
+    ? ' · <span style="color:#86efac">● updated ' + new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + '</span>'
+    : ' · <span style="color:#fca5a5;font-weight:700">● NOT UPDATING — check internet</span>');
+}
+
+function mergePulled(data){
+  var changed = false;
+  (data.patients || []).forEach(function(p){
+    if (!p.card) return;
+    var local = patients[p.card];
+    if (local && local._dirty) {                       // local edit not confirmed yet
+      if (sig(local) === sig(p)) { delete local._dirty; delete local._dirtyAt; changed = true; }  // sheet now has it
+      return;                                          // otherwise keep local version
+    }
+    if (!local || sig(local) !== sig(p)) changed = true;
+    patients[p.card] = p;
+  });
+  if (changed) persist();
+  return changed;
+}
+
+function pullFromSheet(done, silent){
+  if (!isConfigured()) { if (done) done(false); return; }
+  if (done) _waiters.push(done);
+  if (_pulling) return;
+  _pulling = true;
+  if (!silent) showToast('syncing', '☁ Loading data from Google Sheets...');
+
+  var cbName = 'hcCb_' + Date.now();
+  var script = document.createElement('script');
+  var finished = false, timer;
+
+  function finish(ok, data){
+    if (finished) return;
+    finished = true;
+    clearTimeout(timer);
+    _pulling = false;
+    window[cbName] = function(){};                     // ignore a late reply
+    if (script.parentNode) script.parentNode.removeChild(script);
+    var changed = false;
+    if (ok) changed = mergePulled(data);
+    setPullStatus(ok);
+    if (ok && (changed || !silent)) { refreshAll_reg(); refreshNurseList(); refreshMOList(); refreshAll(); updateCounts(); }
+    if (!silent) {
+      if (ok) showToast('synced', '✓ Loaded ' + (data.patients || []).length + ' records from Google Sheets');
+      else    showToast('error',  '⚠ Could not load from Google Sheets');
+    }
+    var cbs = _waiters; _waiters = [];
+    cbs.forEach(function(f){ try { f(ok); } catch(e) { console.error(e); } });
   }
 
-  window.hcCallback = function(data) {
-    cleanup();
-    if (data && data.success && data.patients && data.patients.length > 0) {
-      var count = 0;
-      data.patients.forEach(function(p){
-        if (p.card) {
-          // Preserve reg_date if not set (use date field from sheet)
-          if (!p.reg_date && p.date) p.reg_date = p.date;
-          patients[p.card] = p;
-          count++;
-        }
-      });
-      persist();
-      refreshAll_reg(); refreshNurseList(); refreshMOList(); refreshAll(); updateCounts();
-      showToast('synced', '✓ Loaded ' + count + ' patients from Google Sheets');
-      console.log('[Pull] Loaded', count, 'patients via JSONP');
-    } else {
-      document.getElementById('sync-toast').className = '';
-      console.log('[Pull] No patients returned or empty sheet');
-    }
-  };
-
-  var script = document.createElement('script');
-  script.id  = 'hc-pull-script';
-  script.src = url;
-  script.onerror = function(){
-    cleanup();
-    console.warn('[Pull] Script load failed');
-    document.getElementById('sync-toast').className = '';
-  };
+  window[cbName] = function(data){ finish(!!(data && data.success), data); };
+  timer = setTimeout(function(){ finish(false); }, 20000);
+  script.onerror = function(){ finish(false); };
+  script.src = SHEET_URL + '?action=get_all&camp=' + encodeURIComponent(CAMP_NAME) + '&callback=' + cbName + '&t=' + Date.now();
   document.head.appendChild(script);
 }
 
@@ -660,6 +681,7 @@ function showTab(id, el) {
   if (id==='nurse') refreshNurseList();
   if (id==='mo')    refreshMOList();
   if (id==='all')   refreshAll();
+   if (id === 'nurse' || id === 'mo') pullFromSheet(null, true);
   updateCounts();
 }
 
@@ -710,7 +732,8 @@ function registerPatient() {
     meds:'',fp:'',surgery:'',referral:'',triage:'',
     hc:false,bi:false,bi_detail:'',dp:false,cp:false,echo:false,vit:false,
     remarks:'',status:'registered',
-    reg_date:new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}),
+        reg_date: todayStr(),
+    reg_key:  localKey(),
     time:new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
   };
   persist();
@@ -771,15 +794,40 @@ function calcBMI(){
 }
 
 // ── NURSE SEARCH ───────────────────────────────────────────────
+function findFresh(card, needVitals, cb){
+  var p = patients[card];
+  if (p && !(needVitals && p.status === 'registered')) { cb(p); return; }
+  pullFromSheet(function(){ cb(patients[card]); }, true);
+}
+
 function nurseSearch(){
-  var card=document.getElementById('n-search').value.trim().toUpperCase();
-  if(!card){showAlert('Enter a Card No to search','danger');return;}
-  var p=patients[card];
-  if(!p){
-    document.getElementById('n-info').innerHTML='<div class="alert alert-danger">⚠ No patient found for Card No: <strong>'+card+'</strong></div>';
-    document.getElementById('n-form').style.display='none';return;
-  }
-  loadNurseForm(card);
+  var card = document.getElementById('n-search').value.trim().toUpperCase();
+  if (!card) { showAlert('Enter a Card No to search','danger'); return; }
+  document.getElementById('n-info').innerHTML = '<div style="color:var(--muted);padding:6px 0">⏳ Checking Google Sheets...</div>';
+  findFresh(card, false, function(p){
+    if (!p) {
+      document.getElementById('n-info').innerHTML = '<div class="alert alert-danger">⚠ No patient found for Card No: <strong>' + card + '</strong></div>';
+      document.getElementById('n-form').style.display = 'none'; return;
+    }
+    loadNurseForm(card);
+  });
+}
+
+function moSearch(){
+  var card = document.getElementById('m-search').value.trim().toUpperCase();
+  if (!card) { showAlert('Enter a Card No to search','danger'); return; }
+  document.getElementById('m-info').innerHTML = '<div style="color:var(--muted);padding:6px 0">⏳ Checking Google Sheets...</div>';
+  findFresh(card, true, function(p){
+    if (!p) {
+      document.getElementById('m-info').innerHTML = '<div class="alert alert-danger">⚠ No patient found for Card No: <strong>' + card + '</strong></div>';
+      document.getElementById('m-form').style.display = 'none'; return;
+    }
+    if (p.status === 'registered') {
+      document.getElementById('m-info').innerHTML = '<div class="alert alert-info">ℹ Patient <strong>' + p.name + '</strong> has not had vitals recorded yet. Please send to Nursing station first.</div>';
+      document.getElementById('m-form').style.display = 'none'; return;
+    }
+    loadMOForm(card);
+  });
 }
 
 function loadNurseForm(card){
@@ -866,19 +914,40 @@ function ptChip(p, mode){
 }
 
 // ── MO SEARCH ──────────────────────────────────────────────────
+function findFresh(card, needVitals, cb){
+  var p = patients[card];
+  if (p && !(needVitals && p.status === 'registered')) { cb(p); return; }
+  pullFromSheet(function(){ cb(patients[card]); }, true);
+}
+
+function nurseSearch(){
+  var card = document.getElementById('n-search').value.trim().toUpperCase();
+  if (!card) { showAlert('Enter a Card No to search','danger'); return; }
+  document.getElementById('n-info').innerHTML = '<div style="color:var(--muted);padding:6px 0">⏳ Checking Google Sheets...</div>';
+  findFresh(card, false, function(p){
+    if (!p) {
+      document.getElementById('n-info').innerHTML = '<div class="alert alert-danger">⚠ No patient found for Card No: <strong>' + card + '</strong></div>';
+      document.getElementById('n-form').style.display = 'none'; return;
+    }
+    loadNurseForm(card);
+  });
+}
+
 function moSearch(){
-  var card=document.getElementById('m-search').value.trim().toUpperCase();
-  if(!card){showAlert('Enter a Card No to search','danger');return;}
-  var p=patients[card];
-  if(!p){
-    document.getElementById('m-info').innerHTML='<div class="alert alert-danger">⚠ No patient found for Card No: <strong>'+card+'</strong></div>';
-    document.getElementById('m-form').style.display='none';return;
-  }
-  if(p.status==='registered'){
-    document.getElementById('m-info').innerHTML='<div class="alert alert-info">ℹ Patient <strong>'+p.name+'</strong> has not had vitals recorded yet. Please send to Nursing station first.</div>';
-    document.getElementById('m-form').style.display='none';return;
-  }
-  loadMOForm(card);
+  var card = document.getElementById('m-search').value.trim().toUpperCase();
+  if (!card) { showAlert('Enter a Card No to search','danger'); return; }
+  document.getElementById('m-info').innerHTML = '<div style="color:var(--muted);padding:6px 0">⏳ Checking Google Sheets...</div>';
+  findFresh(card, true, function(p){
+    if (!p) {
+      document.getElementById('m-info').innerHTML = '<div class="alert alert-danger">⚠ No patient found for Card No: <strong>' + card + '</strong></div>';
+      document.getElementById('m-form').style.display = 'none'; return;
+    }
+    if (p.status === 'registered') {
+      document.getElementById('m-info').innerHTML = '<div class="alert alert-info">ℹ Patient <strong>' + p.name + '</strong> has not had vitals recorded yet. Please send to Nursing station first.</div>';
+      document.getElementById('m-form').style.display = 'none'; return;
+    }
+    loadMOForm(card);
+  });
 }
 
 function loadMOForm(card){
@@ -1171,57 +1240,26 @@ function exportCSV(){
 
 // ── SYNC ───────────────────────────────────────────────────────
 function syncToSheet(p){
-  console.log('[Sync] isConfigured:', isConfigured(), 'URL:', SHEET_URL ? SHEET_URL.slice(0,60)+'...' : 'EMPTY');
-  if(!isConfigured()){
-    console.warn('[Sync] Skipped — SHEET_URL not set to a valid Google Script URL');
-    return;
-  }
-  showToast('syncing','☁ Syncing...');
-  // Always send reg_date in the same format used by registration
-  var regDate = p.reg_date || new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-  var payload = JSON.stringify({
-    action: 'upsert',
-    camp: CAMP_NAME,
-    date: regDate,
-    patient: p
-  });
-  console.log('[Sync] Sending payload for card:', p.card);
-  fetch(SHEET_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: {'Content-Type': 'application/json'},
-    body: payload
-  }).then(function(){
-    showToast('synced', '✓ Synced to Google Sheets');
-    console.log('[Sync] Done:', p.card);
-  }).catch(function(err){
-    showToast('error', '⚠ Sync failed — saved locally');
-    console.error('[Sync] Fetch error:', err);
+  if (!isConfigured()) { console.warn('[Sync] SHEET_URL not set'); return; }
+  p._dirty = true; p._dirtyAt = Date.now(); persist();   // stays "unconfirmed" until the sheet shows it
+  showToast('syncing', '☁ Saving...');
+  var payload = JSON.stringify({ action:'upsert', camp:CAMP_NAME, date:(p.reg_date || todayStr()), patient:p });
+  fetch(SHEET_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:payload })
+    .then(function(){ showToast('synced', '✓ Sent to Google Sheets'); })
+    .catch(function(err){ showToast('error', '⚠ Not sent — will retry automatically'); console.error('[Sync]', err); });
+}
+
+function pushDirty(force){
+  Object.values(patients).forEach(function(p){
+    if (p._dirty && (force || Date.now() - (p._dirtyAt || 0) > 30000)) syncToSheet(p);
   });
 }
 function syncNow(){
-  if(!isConfigured()){
-    showAlert('⚠ Google Script URL not configured. Check SHEET_URL in index.html','danger');
-    return;
-  }
-  // Pull latest from sheet first, then push local
-  showToast('syncing', '☁ Syncing with Google Sheets...');
-  pullFromSheet();
-  var list = Object.values(patients);
-  if(list.length){
-    fetch(SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({action:'sync_all', camp:CAMP_NAME, date:new Date().toLocaleDateString('en-IN'), patients:list})
-    }).then(function(){
-      showToast('synced', '✓ Sync complete — ' + list.length + ' records');
-    }).catch(function(err){
-      showToast('error', '⚠ Push failed — check connection');
-      console.error('[SyncNow] Push error:', err);
-    });
-  }
+  if (!isConfigured()) { showAlert('⚠ Google Script URL not configured. Check SHEET_URL in index.html','danger'); return; }
+  pushDirty(true);
+  pullFromSheet(null, false);
 }
+
 
 var toastTimer;
 function showToast(cls,msg){
@@ -1257,6 +1295,13 @@ window.closePrintFrame = function() {
   if (root)  root.style.display  = '';
 };
 
+setInterval(function(){
+  if (document.hidden) return;
+  pullFromSheet(function(ok){ if (ok) pushDirty(false); }, true);
+}, 12000);
+document.addEventListener('visibilitychange', function(){
+  if (!document.hidden) pullFromSheet(null, true);
+});
 // ── START ──────────────────────────────────────────────────────
 init();
 
